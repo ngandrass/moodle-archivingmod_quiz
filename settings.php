@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin administration pages are defined here.
+ * Plugin administration pages are defined here
  *
  * @package     archivingmod_quiz
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
