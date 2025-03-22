@@ -60,13 +60,13 @@ if ($hassiteconfig) {
         ));
         */
 
-        // Generic settings.
+        // Worker service.
         $settings->add(new admin_setting_heading('archivingmod_quiz/header_archive_worker',
             get_string('setting_header_archive_worker', 'archivingmod_quiz'),
             get_string('setting_header_archive_worker_desc', 'archivingmod_quiz')
         ));
 
-        // Worker URL.
+        // Worker service: URL.
         $settings->add(new admin_setting_configtext('archivingmod_quiz/worker_url',
             get_string('setting_worker_url', 'archivingmod_quiz'),
             get_string('setting_worker_url_desc', 'archivingmod_quiz'),
@@ -74,7 +74,7 @@ if ($hassiteconfig) {
             PARAM_TEXT
         ));
 
-        // Webservice.
+        // Worker service: Webservice.
         $settings->add(new admin_setting_configselect('archivingmod_quiz/webservice_id',
             get_string('webservice', 'webservice'),
             get_string('setting_webservice_desc', 'archivingmod_quiz'),
@@ -82,7 +82,7 @@ if ($hassiteconfig) {
             [-1 => ''] + $DB->get_records_menu('external_services', null, 'name ASC', 'id, name')
         ));
 
-        // Webservice user.
+        // Worker service: Webservice user.
         $settings->add(new admin_setting_configtext('archivingmod_quiz/webservice_userid',
             get_string('setting_webservice_userid', 'archivingmod_quiz'),
             get_string('setting_webservice_userid_desc', 'archivingmod_quiz'),
@@ -90,15 +90,7 @@ if ($hassiteconfig) {
             PARAM_INT
         ));
 
-        // Job timeout.
-        $settings->add(new admin_setting_configtext('archivingmod_quiz/job_timeout_min',
-            get_string('setting_job_timeout_min', 'archivingmod_quiz'),
-            get_string('setting_job_timeout_min_desc', 'archivingmod_quiz'),
-            '60',
-            PARAM_INT
-        ));
-
-        // Custom Moodle base URL.
+        // Worker service: Custom Moodle base URL.
         $settings->add(new admin_setting_configtext('archivingmod_quiz/internal_wwwroot',
             get_string('setting_internal_wwwroot', 'archivingmod_quiz'),
             get_string('setting_internal_wwwroot_desc', 'archivingmod_quiz'),
@@ -108,51 +100,51 @@ if ($hassiteconfig) {
 
         // Job Presets.
         $settings->add(new admin_setting_heading('archivingmod_quiz/header_job_presets',
-            get_string('setting_header_job_presets', 'archivingmod_quiz'),
-            get_string('setting_header_job_presets_desc', 'archivingmod_quiz'),
+            get_string('setting_header_job_presets', 'local_archiving'),
+            get_string('setting_header_job_presets_desc', 'local_archiving'),
         ));
 
-        // Export Attempts.
+        // Job preset: Export Attempts.
         $settings->add(new admin_setting_configcheckbox_alwaystrue('archivingmod_quiz/job_preset_export_attempts',
-            get_string('export_attempts', 'archivingmod_quiz'),
-            get_string('export_attempts_help', 'archivingmod_quiz'),
+            get_string('task_export_attempts', 'archivingmod_quiz'),
+            get_string('task_export_attempts_help', 'archivingmod_quiz'),
             '1',
         ));
 
-        // Attempt report sections.
+        // Job preset: Attempt report sections.
         foreach (attempt_report::SECTIONS as $section) {
-            $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_export_report_section_'.$section,
-                get_string('export_report_section_'.$section, 'archivingmod_quiz'),
-                get_string('export_report_section_'.$section.'_help', 'archivingmod_quiz'),
+            $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_report_section_'.$section,
+                get_string('task_report_section_'.$section, 'archivingmod_quiz'),
+                get_string('task_report_section_'.$section.'_help', 'archivingmod_quiz'),
                 '1',
             );
             $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
 
             foreach (attempt_report::SECTION_DEPENDENCIES[$section] as $dependency) {
-                $set->add_dependent_on('archivingmod_quiz/job_preset_export_report_section_'.$dependency);
+                $set->add_dependent_on('archivingmod_quiz/job_preset_report_section_'.$dependency);
             }
 
             $settings->add($set);
         }
 
-        // Export paper format.
-        $set = new admin_setting_configselect('archivingmod_quiz/job_preset_export_attempts_paper_format',
-            get_string('export_attempts_paper_format', 'archivingmod_quiz'),
-            get_string('export_attempts_paper_format_help', 'archivingmod_quiz'),
+        // Job preset: Export paper format.
+        $set = new admin_setting_configselect('archivingmod_quiz/job_preset_paper_format',
+            get_string('task_paper_format', 'archivingmod_quiz'),
+            get_string('task_paper_format_help', 'archivingmod_quiz'),
             'A4',
             array_combine(attempt_report::PAPER_FORMATS, attempt_report::PAPER_FORMATS),
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
 
-        // Attempt filename pattern.
-        $set = new admin_setting_filename_pattern('archivingmod_quiz/job_preset_export_attempts_filename_pattern',
-            get_string('export_attempts_filename_pattern', 'archivingmod_quiz'),
-            get_string('export_attempts_filename_pattern_help', 'archivingmod_quiz', [
+        // Job preset: Attempt filename pattern.
+        $set = new admin_setting_filename_pattern('archivingmod_quiz/job_preset_attempt_filename_pattern',
+            get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
+            get_string('task_attempt_filename_pattern_help', 'archivingmod_quiz', [
                 'variables' => array_reduce(
                     task::ATTEMPT_FILENAME_PATTERN_VARIABLES,
                     fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
-                        get_string('export_attempts_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
+                        get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
                         "</li>"
                     , ""
                 ),
@@ -165,52 +157,52 @@ if ($hassiteconfig) {
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
 
-        // Image optimization.
-        $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_export_attempts_image_optimize',
-            get_string('export_attempts_image_optimize', 'archivingmod_quiz'),
-            get_string('export_attempts_image_optimize_help', 'archivingmod_quiz'),
+        // Job preset: Image optimization.
+        $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_image_optimize',
+            get_string('task_image_optimize', 'archivingmod_quiz'),
+            get_string('task_image_optimize_help', 'archivingmod_quiz'),
             '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
 
-        // Image optimization: Max width.
-        $set = new admin_setting_configtext('archivingmod_quiz/job_preset_export_attempts_image_optimize_width',
-            get_string('export_attempts_image_optimize_width', 'archivingmod_quiz'),
-            get_string('export_attempts_image_optimize_width_help', 'archivingmod_quiz'),
+        // Job preset: Image optimization: Max width.
+        $set = new admin_setting_configtext('archivingmod_quiz/job_preset_image_optimize_width',
+            get_string('task_image_optimize_width', 'archivingmod_quiz'),
+            get_string('task_image_optimize_width_help', 'archivingmod_quiz'),
             '1280',
             PARAM_INT
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $set->add_dependent_on('archivingmod_quiz/job_preset_export_attempts_image_optimize');
+        $set->add_dependent_on('archivingmod_quiz/job_preset_image_optimize');
         $settings->add($set);
 
-        // Image optimization: Max height.
-        $set = new admin_setting_configtext('archivingmod_quiz/job_preset_export_attempts_image_optimize_height',
-            get_string('export_attempts_image_optimize_height', 'archivingmod_quiz'),
-            get_string('export_attempts_image_optimize_height_help', 'archivingmod_quiz'),
+        // Job preset: Image optimization: Max height.
+        $set = new admin_setting_configtext('archivingmod_quiz/job_preset_image_optimize_height',
+            get_string('task_image_optimize_height', 'archivingmod_quiz'),
+            get_string('task_image_optimize_height_help', 'archivingmod_quiz'),
             '1280',
             PARAM_INT
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $set->add_dependent_on('archivingmod_quiz/job_preset_export_attempts_image_optimize');
+        $set->add_dependent_on('archivingmod_quiz/job_preset_image_optimize');
         $settings->add($set);
 
-        // Image optimization: Quality.
-        $set = new admin_setting_configtext('archivingmod_quiz/job_preset_export_attempts_image_optimize_quality',
-            get_string('export_attempts_image_optimize_quality', 'archivingmod_quiz'),
-            get_string('export_attempts_image_optimize_quality_help', 'archivingmod_quiz'),
+        // Job preset: Image optimization: Quality.
+        $set = new admin_setting_configtext('archivingmod_quiz/job_preset_image_optimize_quality',
+            get_string('task_image_optimize_quality', 'archivingmod_quiz'),
+            get_string('task_image_optimize_quality_help', 'archivingmod_quiz'),
             '85',
             PARAM_INT
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $set->add_dependent_on('archivingmod_quiz/job_preset_export_attempts_image_optimize');
+        $set->add_dependent_on('archivingmod_quiz/job_preset_image_optimize');
         $settings->add($set);
 
-        // Keep HTML files.
-        $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_export_attempts_keep_html_files',
-            get_string('export_attempts_keep_html_files', 'archivingmod_quiz'),
-            get_string('export_attempts_keep_html_files_help', 'archivingmod_quiz'),
+        // Job preset: Keep HTML files.
+        $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_keep_html_files',
+            get_string('task_keep_html_files', 'archivingmod_quiz'),
+            get_string('task_keep_html_files_help', 'archivingmod_quiz'),
             '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
