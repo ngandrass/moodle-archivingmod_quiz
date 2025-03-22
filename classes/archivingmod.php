@@ -47,7 +47,7 @@ class archivingmod extends archivingmod_base {
      * @inheritDoc archivingmod_base::get_supported_activities()
      */
     public static function get_supported_activities(): array {
-        return ['mod_quiz'];
+        return ['quiz'];
     }
 
     /**
