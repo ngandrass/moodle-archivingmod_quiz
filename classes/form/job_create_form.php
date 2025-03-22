@@ -41,11 +41,6 @@ class job_create_form extends \local_archiving\form\job_create_form {
      * @inheritDoc \local_archiving\form\job_create_form::definition_base_settings()
      */
     protected function definition_base_settings(): void {
-        parent::definition_base_settings();
-
-        // Options: Test.
-        $this->_form->addElement('static', 'quiz_name', get_string('modulename', 'mod_quiz'), $this->cminfo->name);
-
         // Options: Attempts.
         $this->_form->addElement(
             'advcheckbox',
@@ -77,14 +72,14 @@ class job_create_form extends \local_archiving\form\job_create_form {
                 }
             }
         }
+
+        parent::definition_base_settings();
     }
 
     /**
      * @inheritDoc \local_archiving\form\job_create_form::definition_advanced_settings()
      */
     protected function definition_advanced_settings(): void {
-        parent::definition_advanced_settings();
-
         global $CFG;
 
         // Advanced options: Paper format.
@@ -98,39 +93,16 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->addHelpButton('paper_format', 'task_paper_format', 'archivingmod_quiz');
         $this->_form->setDefault('paper_format', $this->config->handler->job_preset_paper_format);
 
-        // Advanced options: Attempts filename pattern.
+        // Advanced options: Keep HTML files.
         $this->_form->addElement(
-            'text',
-            'attempt_filename_pattern',
-            get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
-            $this->config->handler->job_preset_attempt_filename_pattern_locked ? 'disabled' : null
+            'advcheckbox',
+            'keep_html_files',
+            get_string('task_keep_html_files', 'archivingmod_quiz'),
+            get_string('task_keep_html_files_desc', 'archivingmod_quiz'),
+            $this->config->handler->job_preset_keep_html_files_locked ? 'disabled' : null
         );
-        if ($CFG->branch > 402) {
-            $this->_form->addHelpButton(
-                'attempt_filename_pattern',
-                'task_attempt_filename_pattern',
-                'archivingmod_quiz',
-                '',
-                false,
-                [
-                    'variables' => array_reduce(
-                        task::ATTEMPT_FILENAME_PATTERN_VARIABLES,
-                        fn($res, $varname) => $res."<li>".
-                            "<code>\${".$varname."}</code>: ".
-                            get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
-                            "</li>",
-                        ""
-                    ),
-                    'forbiddenchars' => implode('', \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS),
-                ]
-            );
-        } else {
-            // TODO (MDL-0): Remove after deprecation of Moodle 4.1 (LTS) on 08-12-2025.
-            $this->_form->addHelpButton('attempt_filename_pattern', 'task_attempts_filename_pattern_moodle42', 'archivingmod_quiz');
-        }
-        $this->_form->setType('attempt_filename_pattern', PARAM_TEXT);
-        $this->_form->setDefault('attempt_filename_pattern', $this->config->handler->job_preset_attempt_filename_pattern);
-        $this->_form->addRule('attempt_filename_pattern', null, 'maxlength', 255, 'client');
+        $this->_form->addHelpButton('keep_html_files', 'task_keep_html_files', 'archivingmod_quiz');
+        $this->_form->setDefault('keep_html_files', $this->config->handler->job_preset_keep_html_files);
 
         // Advanced options: Image optimization.
         $this->_form->addElement(
@@ -249,16 +221,41 @@ class job_create_form extends \local_archiving\form\job_create_form {
         );
         $this->_form->hideIf('image_optimize_quality_group', 'image_optimize', 'notchecked');
 
-        // Advanced options: Keep HTML files.
+        // Advanced options: Attempts filename pattern.
         $this->_form->addElement(
-            'advcheckbox',
-            'keep_html_files',
-            get_string('task_keep_html_files', 'archivingmod_quiz'),
-            get_string('task_keep_html_files_desc', 'archivingmod_quiz'),
-            $this->config->handler->job_preset_keep_html_files_locked ? 'disabled' : null
+            'text',
+            'attempt_filename_pattern',
+            get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
+            $this->config->handler->job_preset_attempt_filename_pattern_locked ? 'disabled' : null
         );
-        $this->_form->addHelpButton('keep_html_files', 'task_keep_html_files', 'archivingmod_quiz');
-        $this->_form->setDefault('keep_html_files', $this->config->handler->job_preset_keep_html_files);
+        if ($CFG->branch > 402) {
+            $this->_form->addHelpButton(
+                'attempt_filename_pattern',
+                'task_attempt_filename_pattern',
+                'archivingmod_quiz',
+                '',
+                false,
+                [
+                    'variables' => array_reduce(
+                        task::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+                        fn($res, $varname) => $res."<li>".
+                            "<code>\${".$varname."}</code>: ".
+                            get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
+                            "</li>",
+                        ""
+                    ),
+                    'forbiddenchars' => implode('', \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS),
+                ]
+            );
+        } else {
+            // TODO (MDL-0): Remove after deprecation of Moodle 4.1 (LTS) on 08-12-2025.
+            $this->_form->addHelpButton('attempt_filename_pattern', 'task_attempts_filename_pattern_moodle42', 'archivingmod_quiz');
+        }
+        $this->_form->setType('attempt_filename_pattern', PARAM_TEXT);
+        $this->_form->setDefault('attempt_filename_pattern', $this->config->handler->job_preset_attempt_filename_pattern);
+        $this->_form->addRule('attempt_filename_pattern', null, 'maxlength', 255, 'client');
+
+        parent::definition_advanced_settings();
     }
 
     /**
