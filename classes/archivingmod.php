@@ -52,10 +52,10 @@ class archivingmod extends archivingmod_base {
 
     /**
      * @inheritDoc archivingmod_base::get_task_settings_form()
+     * @throws \dml_exception
      */
-    public function get_task_settings_form(): \moodleform {
-        // TODO: Implement get_task_settings_form() method.
-        return null;
+    public function get_task_settings_form(string $handler, \cm_info $cminfo): \moodleform {
+        return new form\job_create_form($handler, $cminfo);
     }
 
 }
