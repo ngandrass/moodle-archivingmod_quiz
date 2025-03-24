@@ -36,24 +36,56 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class archivingmod extends archivingmod_base {
 
+    /** @var \stdClass Course the quiz lives in */
+    protected \stdClass $course;
+
+    /** @var \cm_info Info object of the associated course module */
+    protected \cm_info $cm;
+
+    /** @var int ID of the targeted quiz */
+    protected int $quizid;
+
     /**
-     * @inheritDoc archivingmod_base::get_name()
+     * @throws \moodle_exception
      */
+    public function __construct(int $courseid, int $cmid) {
+        parent::__construct($courseid, $cmid);
+
+        // Try to get course, cm info, and quiz.
+        list($this->course, $this->cm) = get_course_and_cm_from_cmid($cmid, 'quiz');
+        if (empty($this->cm)) {
+            throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz');
+        }
+        if ($this->course->id != $courseid) {
+            throw new \moodle_exception('invalid_courseid', 'archivingmod_quiz');
+        }
+        $this->quizid = $this->cm->instance;
+    }
+
     public static function get_name(): string {
         return get_string('pluginname', 'archivingmod_quiz');
     }
 
-    /**
-     * @inheritDoc archivingmod_base::get_supported_activities()
-     */
     public static function get_supported_activities(): array {
         return ['quiz'];
     }
 
-    /**
-     * @inheritDoc archivingmod_base::get_task_settings_form()
-     * @throws \dml_exception
-     */
+    public function can_be_archived(): bool {
+        global $DB;
+
+        // Check if quiz has questions.
+        if (!$DB->record_exists('quiz_slots', ['quizid' => $this->quizid])) {
+            return false;
+        }
+
+        // Check if quiz has attempts.
+        if (!$DB->record_exists('quiz_attempts', ['quiz' => $this->quizid, 'preview' => 0])) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function get_job_create_form(string $handler, \cm_info $cminfo): \local_archiving\form\job_create_form {
         return new form\job_create_form($handler, $cminfo);
     }
