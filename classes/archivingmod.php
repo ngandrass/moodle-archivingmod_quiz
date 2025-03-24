@@ -25,7 +25,7 @@
 
 namespace archivingmod_quiz;
 
-use local_archiving\driver\archivingmod_base;
+use local_archiving\driver\mod\task;
 
 // @codingStandardsIgnoreFile
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Quiz activity archiving driver
  */
-class archivingmod extends archivingmod_base {
+class archivingmod extends \local_archiving\driver\mod\archivingmod {
 
     /** @var \stdClass Course the quiz lives in */
     protected \stdClass $course;
@@ -90,4 +90,11 @@ class archivingmod extends archivingmod_base {
         return new form\job_create_form($handler, $cminfo);
     }
 
+    public function create_task(int $jobid, \stdClass $tasksettings): task {
+        // TODO: Implement create_task() method.
+    }
+
+    public function execute_task(task $task): void {
+        // TODO: Implement execute_task() method.
+    }
 }
