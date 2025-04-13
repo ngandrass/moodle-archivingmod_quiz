@@ -66,7 +66,7 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         return get_string('pluginname', 'archivingmod_quiz');
     }
 
-    public static function get_modname(): string {
+    public static function get_plugname(): string {
         return 'quiz';
     }
 
