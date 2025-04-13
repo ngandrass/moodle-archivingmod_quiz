@@ -25,7 +25,10 @@
 
 namespace archivingmod_quiz;
 
+use local_archiving\archive_job;
 use local_archiving\driver\mod\task;
+use local_archiving\driver\mod\task_status;
+use local_archiving\exception\yield_exception;
 
 // @codingStandardsIgnoreFile
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -45,18 +48,15 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
     /** @var int ID of the targeted quiz */
     protected int $quizid;
 
-    /**
-     * @throws \moodle_exception
-     */
-    public function __construct(int $courseid, int $cmid) {
-        parent::__construct($courseid, $cmid);
+    public function __construct(\context_module $context) {
+        parent::__construct($context);
 
         // Try to get course, cm info, and quiz.
-        list($this->course, $this->cm) = get_course_and_cm_from_cmid($cmid, 'quiz');
+        list($this->course, $this->cm) = get_course_and_cm_from_cmid($this->cmid, 'quiz');
         if (empty($this->cm)) {
             throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz');
         }
-        if ($this->course->id != $courseid) {
+        if ($this->course->id != $this->courseid) {
             throw new \moodle_exception('invalid_courseid', 'archivingmod_quiz');
         }
         $this->quizid = $this->cm->instance;
@@ -66,12 +66,19 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         return get_string('pluginname', 'archivingmod_quiz');
     }
 
+    public static function get_modname(): string {
+        return 'quiz';
+    }
+
     public static function get_supported_activities(): array {
         return ['quiz'];
     }
 
     public function can_be_archived(): bool {
         global $DB;
+
+        // FIXME: Always mark as archivable for debug purposes.
+        return true;
 
         // Check if quiz has questions.
         if (!$DB->record_exists('quiz_slots', ['quizid' => $this->quizid])) {
@@ -90,11 +97,43 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         return new form\job_create_form($handler, $cminfo);
     }
 
-    public function create_task(int $jobid, \stdClass $tasksettings): task {
-        // TODO: Implement create_task() method.
+    public function execute_task(task $task): void {
+        $status = $task->get_status();
+
+        try {
+            if ($status == task_status::STATUS_UNINITIALIZED) {
+                $status = task_status::STATUS_CREATED;
+            }
+
+            if ($status == task_status::STATUS_CREATED) {
+                $status = task_status::STATUS_AWAITING_PROCESSING;
+                throw new yield_exception();
+            }
+
+            if ($status == task_status::STATUS_AWAITING_PROCESSING) {
+                $status = task_status::STATUS_RUNNING;
+                $task->set_progress(0);
+                throw new yield_exception();
+            }
+
+            if ($status == task_status::STATUS_RUNNING) {
+                if ($task->get_progress() < 50) {
+                    $task->set_progress(50);
+                    throw new yield_exception();
+                } else if ($task->get_progress() < 100) {
+                    $task->set_progress(100);
+                    throw new yield_exception();
+                } else {
+                    $status = task_status::STATUS_FINALIZING;
+                }
+            }
+
+            if ($status == task_status::STATUS_FINALIZING) {
+                $status = task_status::STATUS_FINISHED;
+            }
+        } finally {
+            $task->set_status($status);
+        }
     }
 
-    public function execute_task(task $task): void {
-        // TODO: Implement execute_task() method.
-    }
 }
