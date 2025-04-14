@@ -237,7 +237,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
                 false,
                 [
                     'variables' => array_reduce(
-                        task::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+                        attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
                         fn($res, $varname) => $res."<li>".
                             "<code>\${".$varname."}</code>: ".
                             get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
@@ -271,7 +271,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
 
         if (!\local_archiving\storage::is_valid_filename_pattern(
             $data['attempt_filename_pattern'],
-            task::ATTEMPT_FILENAME_PATTERN_VARIABLES
+            attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES
         )) {
             $errors['attempt_filename_pattern'] = get_string('error_invalid_attempt_filename_pattern', 'local_archiving');
         }

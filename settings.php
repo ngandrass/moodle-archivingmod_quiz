@@ -142,7 +142,7 @@ if ($hassiteconfig) {
             get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
             get_string('task_attempt_filename_pattern_help', 'archivingmod_quiz', [
                 'variables' => array_reduce(
-                    task::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+                    attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
                     fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
                         get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
                         "</li>"
@@ -151,7 +151,7 @@ if ($hassiteconfig) {
                 'forbiddenchars' => implode('', \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS),
             ]),
             'attempt-${attemptid}-${username}_${date}-${time}',
-            task::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+            attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);

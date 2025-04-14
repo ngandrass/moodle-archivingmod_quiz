@@ -26,8 +26,8 @@
 namespace archivingmod_quiz;
 
 use local_archiving\archive_job;
-use local_archiving\driver\mod\task;
-use local_archiving\driver\mod\task_status;
+use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\driver\mod\activity_archiving_task_status;
 use local_archiving\exception\yield_exception;
 
 // @codingStandardsIgnoreFile
@@ -97,26 +97,26 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         return new form\job_create_form($handler, $cminfo);
     }
 
-    public function execute_task(task $task): void {
+    public function execute_task(activity_archiving_task $task): void {
         $status = $task->get_status();
 
         try {
-            if ($status == task_status::STATUS_UNINITIALIZED) {
-                $status = task_status::STATUS_CREATED;
+            if ($status == activity_archiving_task_status::STATUS_UNINITIALIZED) {
+                $status = activity_archiving_task_status::STATUS_CREATED;
             }
 
-            if ($status == task_status::STATUS_CREATED) {
-                $status = task_status::STATUS_AWAITING_PROCESSING;
+            if ($status == activity_archiving_task_status::STATUS_CREATED) {
+                $status = activity_archiving_task_status::STATUS_AWAITING_PROCESSING;
                 throw new yield_exception();
             }
 
-            if ($status == task_status::STATUS_AWAITING_PROCESSING) {
-                $status = task_status::STATUS_RUNNING;
+            if ($status == activity_archiving_task_status::STATUS_AWAITING_PROCESSING) {
+                $status = activity_archiving_task_status::STATUS_RUNNING;
                 $task->set_progress(0);
                 throw new yield_exception();
             }
 
-            if ($status == task_status::STATUS_RUNNING) {
+            if ($status == activity_archiving_task_status::STATUS_RUNNING) {
                 if ($task->get_progress() < 50) {
                     $task->set_progress(50);
                     throw new yield_exception();
@@ -124,12 +124,12 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
                     $task->set_progress(100);
                     throw new yield_exception();
                 } else {
-                    $status = task_status::STATUS_FINALIZING;
+                    $status = activity_archiving_task_status::STATUS_FINALIZING;
                 }
             }
 
-            if ($status == task_status::STATUS_FINALIZING) {
-                $status = task_status::STATUS_FINISHED;
+            if ($status == activity_archiving_task_status::STATUS_FINALIZING) {
+                $status = activity_archiving_task_status::STATUS_FINISHED;
             }
         } finally {
             $task->set_status($status);

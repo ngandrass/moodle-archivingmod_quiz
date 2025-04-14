@@ -33,6 +33,26 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class attempt_report {
 
+    /** @var string[] Valid variables for attempt report filename patterns */
+    public const ATTEMPT_FILENAME_PATTERN_VARIABLES = [
+        'courseid',
+        'coursename',
+        'courseshortname',
+        'cmid',
+        'quizid',
+        'quizname',
+        'attemptid',
+        'username',
+        'firstname',
+        'lastname',
+        'idnumber',
+        'timestart',
+        'timefinish',
+        'date',
+        'time',
+        'timestamp',
+    ];
+
     /** @var array Sections that can be included in the report */
     public const SECTIONS = [
         "header",
