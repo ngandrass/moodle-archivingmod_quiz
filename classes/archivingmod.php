@@ -129,6 +129,11 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
             }
 
             if ($status == activity_archiving_task_status::STATUS_FINALIZING) {
+                // FIXME: Replace dummy artifact file.
+                $fs = get_file_storage();
+                $artifact = $fs->create_file_from_string($task->generate_artifact_fileinfo('foo.txt'), 'hello world');
+                $task->link_artifact($artifact);
+
                 $status = activity_archiving_task_status::STATUS_FINISHED;
             }
         } finally {
