@@ -37,9 +37,7 @@ require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
  */
 class job_create_form extends \local_archiving\form\job_create_form {
 
-    /**
-     * @inheritDoc \local_archiving\form\job_create_form::definition_base_settings()
-     */
+    #[\Override]
     protected function definition_base_settings(): void {
         // Options: Attempts.
         $this->_form->addElement(
@@ -76,9 +74,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
         parent::definition_base_settings();
     }
 
-    /**
-     * @inheritDoc \local_archiving\form\job_create_form::definition_advanced_settings()
-     */
+    #[\Override]
     protected function definition_advanced_settings(): void {
         global $CFG;
 
@@ -266,6 +262,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
      * @return array Associative array with error messages for invalid fields
      * @throws \coding_exception
      */
+    #[\Override]
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
@@ -286,6 +283,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
      * @return \stdClass Cleared, submitted form data
      * @throws \dml_exception
      */
+    #[\Override]
     public function get_data(): \stdClass {
         $data = parent::get_data();
 

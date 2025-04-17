@@ -26,8 +26,8 @@
 namespace archivingmod_quiz;
 
 use local_archiving\driver\mod\activity_archiving_task;
-use local_archiving\driver\mod\activity_archiving_task_status;
 use local_archiving\exception\yield_exception;
+use local_archiving\type\activity_archiving_task_status;
 
 // @codingStandardsIgnoreFile
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -47,6 +47,7 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
     /** @var int ID of the targeted quiz */
     protected int $quizid;
 
+    #[\Override]
     public function __construct(\context_module $context) {
         parent::__construct($context);
 
@@ -61,18 +62,22 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         $this->quizid = $this->cm->instance;
     }
 
+    #[\Override]
     public static function get_name(): string {
         return get_string('pluginname', 'archivingmod_quiz');
     }
 
+    #[\Override]
     public static function get_plugname(): string {
         return 'quiz';
     }
 
+    #[\Override]
     public static function get_supported_activities(): array {
         return ['quiz'];
     }
 
+    #[\Override]
     public function can_be_archived(): bool {
         global $DB;
 
@@ -92,10 +97,12 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         return true;
     }
 
+    #[\Override]
     public function get_job_create_form(string $handler, \cm_info $cminfo): \local_archiving\form\job_create_form {
         return new form\job_create_form($handler, $cminfo);
     }
 
+    #[\Override]
     public function execute_task(activity_archiving_task $task): void {
         $status = $task->get_status();
 
