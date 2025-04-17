@@ -25,7 +25,6 @@
 
 namespace archivingmod_quiz;
 
-use local_archiving\archive_job;
 use local_archiving\driver\mod\activity_archiving_task;
 use local_archiving\driver\mod\activity_archiving_task_status;
 use local_archiving\exception\yield_exception;
