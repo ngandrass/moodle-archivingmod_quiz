@@ -81,9 +81,6 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
     public function can_be_archived(): bool {
         global $DB;
 
-        // FIXME: Always mark as archivable for debug purposes.
-        return true;
-
         // Check if quiz has questions.
         if (!$DB->record_exists('quiz_slots', ['quizid' => $this->quizid])) {
             return false;
