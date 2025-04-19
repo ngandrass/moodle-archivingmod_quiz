@@ -137,6 +137,27 @@ if ($hassiteconfig) {
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
 
+        // Job preset: Attempt folder name pattern.
+        $set = new admin_setting_filename_pattern('archivingmod_quiz/job_preset_attempt_foldername_pattern',
+            get_string('task_attempt_foldername_pattern', 'archivingmod_quiz'),
+            get_string('task_attempt_foldername_pattern_help', 'archivingmod_quiz', [
+                'variables' => array_reduce(
+                    attempt_report::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+                    fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
+                        get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
+                        "</li>"
+                    , ""
+                ),
+                'forbiddenchars' => implode('', \local_archiving\storage::FOLDERNAME_FORBIDDEN_CHARACTERS),
+            ]),
+            '${username}/${attemptid}-${date}_${time}',
+            attempt_report::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+            \local_archiving\storage::FOLDERNAME_FORBIDDEN_CHARACTERS,
+            PARAM_TEXT,
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
         // Job preset: Attempt filename pattern.
         $set = new admin_setting_filename_pattern('archivingmod_quiz/job_preset_attempt_filename_pattern',
             get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
@@ -152,6 +173,7 @@ if ($hassiteconfig) {
             ]),
             'attempt-${attemptid}-${username}_${date}-${time}',
             attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+            \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);

@@ -39,6 +39,9 @@ class attempt_report {
         'coursename',
         'courseshortname',
         'cmid',
+        'groupids',
+        'groupidnumbers',
+        'groupnames',
         'quizid',
         'quizname',
         'attemptid',
@@ -52,6 +55,9 @@ class attempt_report {
         'time',
         'timestamp',
     ];
+
+    /** @var string[] Valid variables for attempt folder name patterns */
+    public const ATTEMPT_FOLDERNAME_PATTERN_VARIABLES = self::ATTEMPT_FILENAME_PATTERN_VARIABLES;
 
     /** @var array Sections that can be included in the report */
     public const SECTIONS = [

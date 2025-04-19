@@ -78,6 +78,9 @@ $string['task_attempt_filename_pattern_variable_courseid'] = 'Course ID';
 $string['task_attempt_filename_pattern_variable_coursename'] = 'Course name';
 $string['task_attempt_filename_pattern_variable_courseshortname'] = 'Course short name';
 $string['task_attempt_filename_pattern_variable_cmid'] = 'Course module ID';
+$string['task_attempt_filename_pattern_variable_groupids'] = 'Group IDs';
+$string['task_attempt_filename_pattern_variable_groupidnumbers'] = 'Group ID numbers';
+$string['task_attempt_filename_pattern_variable_groupnames'] = 'Group names';
 $string['task_attempt_filename_pattern_variable_quizid'] = 'Quiz ID';
 $string['task_attempt_filename_pattern_variable_quizname'] = 'Quiz name';
 $string['task_attempt_filename_pattern_variable_attemptid'] = 'Attempt ID';
@@ -90,7 +93,10 @@ $string['task_attempt_filename_pattern_variable_timefinish'] = 'Attempt finish u
 $string['task_attempt_filename_pattern_variable_date'] = 'Current date <small>(YYYY-MM-DD)</small>';
 $string['task_attempt_filename_pattern_variable_time'] = 'Current time <small>(HH-MM-SS)</small>';
 $string['task_attempt_filename_pattern_variable_timestamp'] = 'Current unix timestamp';
+$string['task_attempt_foldername_pattern'] = 'Attempt folder name';
+$string['task_attempt_foldername_pattern_help'] = 'Name of the folder(s) the generated quiz attempt reports (PDF files) are stored in. Directories can be nested using slashes. Leading and trailing slashes are not allowed. Variables <b>must</b> follow the <code>${variablename}</code> pattern.<br><br><b>Available variables</b>: <ul>{$a->variables}</ul><b>Forbidden characters</b>: <code>{$a->forbiddenchars}</code>';
 $string['error_invalid_attempt_filename_pattern'] = 'Invalid attempt report filename pattern. Please correct your input and try again.';
+$string['error_invalid_attempt_foldername_pattern'] = 'Invalid attempt report folder name pattern. Please correct your input and try again.';
 
 // Admin settings.
 $string['setting_header_docs_desc'] = 'This plugin archives quiz attempts as PDF and HTML files. It <b>requires a separate <a href="https://quizarchiver.gandrass.de/installation/archiveworker/" target="_blank">worker service</a></b> to be installed for the actual archiving process to work. Please refer to the <a href="https://quizarchiver.gandrass.de/" target="_blank">documentation</a> for more details and setup instructions.';

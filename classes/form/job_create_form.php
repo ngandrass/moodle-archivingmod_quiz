@@ -25,7 +25,7 @@
 namespace archivingmod_quiz\form;
 
 use archivingmod_quiz\attempt_report;
-use archivingmod_quiz\task;
+use local_archiving\storage;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -217,6 +217,35 @@ class job_create_form extends \local_archiving\form\job_create_form {
         );
         $this->_form->hideIf('image_optimize_quality_group', 'image_optimize', 'notchecked');
 
+        // Advanced options: Attempt folder name pattern.
+        $this->_form->addElement(
+            'text',
+            'attempt_foldername_pattern',
+            get_string('task_attempt_foldername_pattern', 'archivingmod_quiz'),
+            $this->config->handler->job_preset_attempt_foldername_pattern_locked ? 'disabled' : null
+        );
+        $this->_form->addHelpButton(
+            'attempt_foldername_pattern',
+            'task_attempt_foldername_pattern',
+            'archivingmod_quiz',
+            '',
+            false,
+            [
+                'variables' => array_reduce(
+                    attempt_report::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+                    fn($res, $varname) => $res . "<li>" .
+                        "<code>\${" . $varname . "}</code>: " .
+                        get_string('task_attempt_filename_pattern_variable_' . $varname, 'archivingmod_quiz') .
+                        "</li>",
+                    ""
+                ),
+                'forbiddenchars' => htmlspecialchars(implode('', storage::FOLDERNAME_FORBIDDEN_CHARACTERS)),
+            ]
+        );
+        $this->_form->setType('attempt_foldername_pattern', PARAM_TEXT);
+        $this->_form->setDefault('attempt_foldername_pattern', $this->config->handler->job_preset_attempt_foldername_pattern);
+        $this->_form->addRule('attempt_foldername_pattern', null, 'maxlength', 255, 'client');
+
         // Advanced options: Attempts filename pattern.
         $this->_form->addElement(
             'text',
@@ -240,7 +269,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
                             "</li>",
                         ""
                     ),
-                    'forbiddenchars' => implode('', \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS),
+                    'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
                 ]
             );
         } else {
@@ -266,9 +295,18 @@ class job_create_form extends \local_archiving\form\job_create_form {
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
-        if (!\local_archiving\storage::is_valid_filename_pattern(
+        if (!storage::is_valid_filename_pattern(
+            $data['attempt_foldername_pattern'],
+            attempt_report::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+            storage::FOLDERNAME_FORBIDDEN_CHARACTERS
+        )) {
+            $errors['attempt_foldername_pattern'] = get_string('error_invalid_attempt_foldername_pattern', 'local_archiving');
+        }
+
+        if (!storage::is_valid_filename_pattern(
             $data['attempt_filename_pattern'],
-            attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES
+            attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+            storage::FILENAME_FORBIDDEN_CHARACTERS
         )) {
             $errors['attempt_filename_pattern'] = get_string('error_invalid_attempt_filename_pattern', 'local_archiving');
         }
