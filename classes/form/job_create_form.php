@@ -25,6 +25,7 @@
 namespace archivingmod_quiz\form;
 
 use archivingmod_quiz\attempt_report;
+use archivingmod_quiz\quiz;
 use local_archiving\storage;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -230,7 +231,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
             false,
             [
                 'variables' => array_reduce(
-                    attempt_report::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+                    quiz::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
                     fn($res, $varname) => $res . "<li>" .
                         "<code>\${" . $varname . "}</code>: " .
                         get_string('task_attempt_filename_pattern_variable_' . $varname, 'archivingmod_quiz') .
@@ -259,7 +260,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
             false,
             [
                 'variables' => array_reduce(
-                    attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+                    quiz::ATTEMPT_FILENAME_PATTERN_VARIABLES,
                     fn($res, $varname) => $res."<li>".
                         "<code>\${".$varname."}</code>: ".
                         get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
@@ -290,7 +291,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
 
         if (!storage::is_valid_filename_pattern(
             $data['attempt_foldername_pattern'],
-            attempt_report::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+            quiz::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
             storage::FOLDERNAME_FORBIDDEN_CHARACTERS
         )) {
             $errors['attempt_foldername_pattern'] = get_string('error_invalid_attempt_foldername_pattern', 'local_archiving');
@@ -298,7 +299,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
 
         if (!storage::is_valid_filename_pattern(
             $data['attempt_filename_pattern'],
-            attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+            quiz::ATTEMPT_FILENAME_PATTERN_VARIABLES,
             storage::FILENAME_FORBIDDEN_CHARACTERS
         )) {
             $errors['attempt_filename_pattern'] = get_string('error_invalid_attempt_filename_pattern', 'local_archiving');
@@ -320,7 +321,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
 
         // Force locked fields to their preset values.
         foreach ($this->config->handler as $key => $value) {
-            if (strpos($key, 'job_preset_') === 0 && strrpos($key, '_locked') === strlen($key) - 7) {
+            if (str_starts_with($key, 'job_preset_') && strrpos($key, '_locked') === strlen($key) - 7) {
                 if ($value) {
                     $data->{substr($key, 11, -7)} = $this->config->handler->{substr($key, 0, -7)};
                 }
