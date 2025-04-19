@@ -76,8 +76,6 @@ class job_create_form extends \local_archiving\form\job_create_form {
 
     #[\Override]
     protected function definition_advanced_settings(): void {
-        global $CFG;
-
         // Advanced options: Paper format.
         $this->_form->addElement(
             'select',
@@ -253,29 +251,24 @@ class job_create_form extends \local_archiving\form\job_create_form {
             get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
             $this->config->handler->job_preset_attempt_filename_pattern_locked ? 'disabled' : null
         );
-        if ($CFG->branch > 402) {
-            $this->_form->addHelpButton(
-                'attempt_filename_pattern',
-                'task_attempt_filename_pattern',
-                'archivingmod_quiz',
-                '',
-                false,
-                [
-                    'variables' => array_reduce(
-                        attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
-                        fn($res, $varname) => $res."<li>".
-                            "<code>\${".$varname."}</code>: ".
-                            get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
-                            "</li>",
-                        ""
-                    ),
-                    'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
-                ]
-            );
-        } else {
-            // TODO (MDL-0): Remove after deprecation of Moodle 4.1 (LTS) on 08-12-2025.
-            $this->_form->addHelpButton('attempt_filename_pattern', 'task_attempts_filename_pattern_moodle42', 'archivingmod_quiz');
-        }
+        $this->_form->addHelpButton(
+            'attempt_filename_pattern',
+            'task_attempt_filename_pattern',
+            'archivingmod_quiz',
+            '',
+            false,
+            [
+                'variables' => array_reduce(
+                    attempt_report::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+                    fn($res, $varname) => $res."<li>".
+                        "<code>\${".$varname."}</code>: ".
+                        get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
+                        "</li>",
+                    ""
+                ),
+                'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
+            ]
+        );
         $this->_form->setType('attempt_filename_pattern', PARAM_TEXT);
         $this->_form->setDefault('attempt_filename_pattern', $this->config->handler->job_preset_attempt_filename_pattern);
         $this->_form->addRule('attempt_filename_pattern', null, 'maxlength', 255, 'client');
