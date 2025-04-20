@@ -24,8 +24,11 @@
 
 use archivingmod_quiz\attempt_report;
 use archivingmod_quiz\quiz;
+use archivingmod_quiz\type\attempt_filename_variable;
+use archivingmod_quiz\type\attempt_report_section;
 use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
+use local_archiving\type\paper_format;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -112,16 +115,16 @@ if ($hassiteconfig) {
         ));
 
         // Job preset: Attempt report sections.
-        foreach (attempt_report::SECTIONS as $section) {
-            $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_report_section_'.$section,
-                get_string('task_report_section_'.$section, 'archivingmod_quiz'),
-                get_string('task_report_section_'.$section.'_help', 'archivingmod_quiz'),
+        foreach (attempt_report_section::cases() as $section) {
+            $set = new admin_setting_configcheckbox('archivingmod_quiz/job_preset_report_section_'.$section->value,
+                get_string('task_report_section_'.$section->value, 'archivingmod_quiz'),
+                get_string('task_report_section_'.$section->value.'_help', 'archivingmod_quiz'),
                 '1',
             );
             $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
 
-            foreach (attempt_report::SECTION_DEPENDENCIES[$section] as $dependency) {
-                $set->add_dependent_on('archivingmod_quiz/job_preset_report_section_'.$dependency);
+            foreach ($section->dependencies() as $dependency) {
+                $set->add_dependent_on('archivingmod_quiz/job_preset_report_section_'.$dependency->value);
             }
 
             $settings->add($set);
@@ -132,7 +135,7 @@ if ($hassiteconfig) {
             get_string('task_paper_format', 'archivingmod_quiz'),
             get_string('task_paper_format_help', 'archivingmod_quiz'),
             'A4',
-            array_combine(attempt_report::PAPER_FORMATS, attempt_report::PAPER_FORMATS),
+            array_combine(paper_format::values(), paper_format::values()),
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
@@ -142,7 +145,7 @@ if ($hassiteconfig) {
             get_string('task_attempt_foldername_pattern', 'archivingmod_quiz'),
             get_string('task_attempt_foldername_pattern_help', 'archivingmod_quiz', [
                 'variables' => array_reduce(
-                    quiz::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+                    attempt_filename_variable::values(),
                     fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
                         get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
                         "</li>"
@@ -151,7 +154,7 @@ if ($hassiteconfig) {
                 'forbiddenchars' => implode('', \local_archiving\storage::FOLDERNAME_FORBIDDEN_CHARACTERS),
             ]),
             '${username}/${attemptid}-${date}_${time}',
-            quiz::ATTEMPT_FOLDERNAME_PATTERN_VARIABLES,
+            attempt_filename_variable::values(),
             \local_archiving\storage::FOLDERNAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
         );
@@ -163,7 +166,7 @@ if ($hassiteconfig) {
             get_string('task_attempt_filename_pattern', 'archivingmod_quiz'),
             get_string('task_attempt_filename_pattern_help', 'archivingmod_quiz', [
                 'variables' => array_reduce(
-                    quiz::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+                    attempt_filename_variable::values(),
                     fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
                         get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
                         "</li>"
@@ -172,7 +175,7 @@ if ($hassiteconfig) {
                 'forbiddenchars' => implode('', \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS),
             ]),
             'attempt-${attemptid}-${username}_${date}-${time}',
-            quiz::ATTEMPT_FILENAME_PATTERN_VARIABLES,
+            attempt_filename_variable::values(),
             \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
         );
