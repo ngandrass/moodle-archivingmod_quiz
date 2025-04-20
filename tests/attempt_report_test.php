@@ -1,0 +1,414 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Tests for the attempt_report class
+ *
+ * @package   archivingmod_quiz
+ * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace archivingmod_quiz;
+
+// @codingStandardsIgnoreLine
+global $CFG;
+
+use archivingmod_quiz\type\attempt_report_section;
+
+require_once($CFG->dirroot . '/mod/quiz/report/archiver/patch_401_class_renames.php');
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+
+/**
+ * Tests for the attempt_report class
+ */
+final class attempt_report_test extends \advanced_testcase {
+
+    /**
+     * Returns the data generator for the archivingmod_quiz plugin
+     *
+     * @return \archivingmod_quiz_generator The data generator for the archivingmod_quiz plugin
+     */
+    // @codingStandardsIgnoreLine
+    public static function getDataGenerator(): \archivingmod_quiz_generator {
+        return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
+    }
+
+    /**
+     * Test generation of a full attempt report with all sections
+     *
+     * @covers \archivingmod_quiz\attempt_report::__construct
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_full_report(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate full report with all sections.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $html = $report->generate($rc->attemptids[0], attempt_report_section::cases());
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify quiz header.
+        $this->assertMatchesRegularExpression(
+            '/<table[^<>]*quizreviewsummary[^<>]*>/',
+            $html,
+            'Quiz header table not found'
+        );
+        $this->assertMatchesRegularExpression(
+            '/<td[^<>]*>' . preg_quote($rc->course->fullname,
+                '/') . '[^<>]+<\/td>/',
+            $html, 'Course name not found'
+        );
+        $this->assertMatchesRegularExpression(
+            '/<td[^<>]*>' . preg_quote($rc->quiz->name,
+                '/') . '[^<>]+<\/td>/',
+            $html, 'Quiz name not found'
+        );
+
+        // Verify overall quiz feedback.
+        // TODO (MDL-0): Add proper overall feedback to reference quiz and check its contents.
+        $this->assertMatchesRegularExpression(
+            '/<th[^<>]*>\s*' . preg_quote(get_string('feedback',
+                'quiz'),
+                '/'
+            ) . '\s*<\/th>/', $html, 'Overall feedback header not found');
+
+        // Verify questions.
+        foreach ($this->getDataGenerator()::QUESTION_TYPES_IN_REFERENCE_QUIZ as $qtype) {
+            $this->assertMatchesRegularExpression(
+                '/<[^<>]*class="[^\"<>]*que[^\"<>]*' . preg_quote($qtype, '/') . '[^\"<>]*"[^<>]*>/',
+                $html,
+                'Question of type ' . $qtype . ' not found'
+            );
+        }
+
+        // Verify individual question feedback.
+        $this->assertMatchesRegularExpression(
+            '/<div class="specificfeedback">/',
+            $html,
+            'Individual question feedback not found'
+        );
+
+        // Verify general question feedback.
+        $this->assertMatchesRegularExpression(
+            '/<div class="generalfeedback">/',
+            $html,
+            'General question feedback not found'
+        );
+
+        // Verify correct answers.
+        $this->assertMatchesRegularExpression(
+            '/<div class="rightanswer">/',
+            $html,
+            'Correct question answers not found'
+        );
+
+        // Verify answer history.
+        $this->assertMatchesRegularExpression(
+            '/<[^<>]*class="responsehistoryheader[^\"<>]*"[^<>]*>/',
+            $html,
+            'Answer history not found'
+        );
+    }
+
+    /**
+     * Tests generation of a full page report with all sections
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_full_page
+     * @covers \archivingmod_quiz\attempt_report::convert_image_to_base64
+     * @covers \archivingmod_quiz\attempt_report::ensure_absolute_url
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_full_page_stub(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+        $html = $report->generate_full_page(
+            $rc->attemptids[0],
+            attempt_report_section::cases(),
+            false,  // We need to disable this since $OUTPUT->header() is not working during tests.
+            false,  // We need to disable this since $OUTPUT->header() is not working during tests.
+            true
+        );
+        $this->assertNotEmpty($html, 'Generated report is empty');
+    }
+
+    /**
+     * Tests generation of a report with no header
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @throws \restore_controller_exception
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_report_no_header(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without a header.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::HEADER,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that quiz header is absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<table[^<>]*quizreviewsummary[^<>]*>/',
+            $html,
+            'Quiz header table found when it should be absent'
+        );
+
+        // If the quiz header is disabled, the quiz feedback should also be absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<th[^<>]*>\s*'.preg_quote(get_string('feedback', 'quiz'), '/').'\s*<\/th>/',
+            $html,
+            'Overall feedback header found when it should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report with no quiz feedback
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_quiz_feedback(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without quiz feedback.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::GENERAL_FEEDBACK,
+            attempt_report_section::QUESTION,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that quiz feedback is absent.
+        $this->assertMatchesRegularExpression(
+            '/<table[^<>]*quizreviewsummary[^<>]*>/',
+            $html,
+            'Quiz header table not found'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/<th[^<>]*>\s*'.preg_quote(get_string('feedback', 'quiz'), '/').'\s*<\/th>/',
+            $html,
+            'Overall feedback header found when it should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report with no questions
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_questions(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without questions.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::QUESTION,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that no questions are present.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<[^<>]*class="[^\"<>]*que[^<>]*>/',
+            $html,
+            'Question found when it should be absent'
+        );
+
+        // If questions are disabled, question_feedback, general_feedback, rightanswer and history should be absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="specificfeedback">/',
+            $html,
+            'Individual question feedback found when it should be absent'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="generalfeedback">/',
+            $html,
+            'General question feedback found when it should be absent'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="rightanswer">/',
+            $html,
+            'Correct question answers found when they should be absent'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/<[^<>]*class="responsehistoryheader[^\"<>]*"[^<>]*>/',
+            $html,
+            'Answer history found when it should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report with no individual question feedback
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_question_feedback(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without question feedback.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::QUESTION_FEEDBACK,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that question feedback is absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="specificfeedback">/',
+            $html,
+            'Individual question feedback found when it should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report with no general question feedback
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_general_feedback(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without general feedback.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::GENERAL_FEEDBACK,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that general feedback is absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="generalfeedback">/',
+            $html,
+            'General question feedback found when it should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report without showing correct answers for questions
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_rightanswers(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without right answers.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::CORRECT_ANSWER,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that right answers are absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="rightanswer">/',
+            $html,
+            'Correct question answers found when they should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report without showing answer histories
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_history(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without answer history.
+        $report = new attempt_report($rc->course, $rc->cm);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::ANSWER_HISTORY,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that answer history is absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<[^<>]*class="responsehistoryheader[^\"<>]*"[^<>]*>/',
+            $html,
+            'Answer history found when it should be absent'
+        );
+    }
+
+}
+
