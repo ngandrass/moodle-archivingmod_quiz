@@ -24,6 +24,7 @@
 
 namespace archivingmod_quiz;
 
+use archivingmod_quiz\type\attempt_report_section;
 use curl;
 use local_archiving\type\image_type;
 use mod_quiz\quiz_attempt;
@@ -66,7 +67,7 @@ class attempt_report {
      * Generates a HTML representation of the quiz attempt
      *
      * @param int $attemptid ID of the attempt this report is for
-     * @param array $sections Array of sections to include in the report
+     * @param attempt_report_section[] $sections Array of sections to include in the report
      *
      * @return string HTML DOM of the rendered quiz attempt report
      *
@@ -105,7 +106,7 @@ class attempt_report {
         }
 
         // Section: Quiz header.
-        if ($sections['header']) {
+        if (in_array(attempt_report_section::HEADER, $sections)) {
             $quizheaderdata = [];
 
             // User name and link.
@@ -212,7 +213,7 @@ class attempt_report {
             $quizheaderdata = array_merge($quizheaderdata, $attemptobj->get_additional_summary_data($options));
 
             // Feedback if there is any, and the user is allowed to see it now.
-            if ($sections['quiz_feedback']) {
+            if (in_array(attempt_report_section::GENERAL_FEEDBACK, $sections)) {
                 $feedback = $attemptobj->get_overall_feedback($grade);
                 $quizheaderdata['feedback'] = [
                     'title' => get_string('feedback', 'quiz'),
@@ -235,7 +236,7 @@ class attempt_report {
         }
 
         // Section: Quiz questions.
-        if ($sections['question']) {
+        if (in_array(attempt_report_section::QUESTION, $sections)) {
             $slots = $attemptobj->get_slots();
             foreach ($slots as $slot) {
                 // Define display options for this question.
@@ -245,10 +246,10 @@ class attempt_report {
                 $displayoptions->readonly = true;
                 $displayoptions->marks = 2;
                 $displayoptions->manualcomment = 1;
-                $displayoptions->rightanswer = $sections['rightanswer'];
-                $displayoptions->feedback = $sections['question_feedback'];
-                $displayoptions->generalfeedback = $sections['general_feedback'];
-                $displayoptions->history = $sections['history'];
+                $displayoptions->rightanswer = in_array(attempt_report_section::CORRECT_ANSWER, $sections);
+                $displayoptions->feedback = in_array(attempt_report_section::QUESTION_FEEDBACK, $sections);
+                $displayoptions->generalfeedback = in_array(attempt_report_section::GENERAL_FEEDBACK, $sections);
+                $displayoptions->history = in_array(attempt_report_section::ANSWER_HISTORY, $sections);
                 $displayoptions->correctness = 1;
                 $displayoptions->numpartscorrect = 1;
                 $displayoptions->flags = 1;
@@ -271,7 +272,7 @@ class attempt_report {
      * footer
      *
      * @param int $attemptid ID of the attempt this report is for
-     * @param array $sections Array of self::SECTIONS to include in the report
+     * @param attempt_report_section[] $sections List of sections to include in the report
      * @param bool $fixrelativeurls If true, all relative URLs will be
      * forcefully mapped to the Moodle base URL
      * @param bool $minimal If true, unneccessary elements (e.g. navbar) are
