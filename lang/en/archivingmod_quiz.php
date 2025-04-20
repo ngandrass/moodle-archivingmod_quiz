@@ -27,6 +27,9 @@
 // Common.
 $string['pluginname'] = 'Quiz';
 
+// Privacy.
+$string['privacy:metadata'] = 'TODO';
+
 // Task settings: General.
 $string['task_export_attempts'] = 'Export quiz attempts';
 $string['task_export_attempts_help'] = 'Quiz attempts will always be exported';
