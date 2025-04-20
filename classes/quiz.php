@@ -42,32 +42,6 @@ class quiz {
     /** @var object Moodle admin settings object */
     protected object $config;
 
-    /** @var string[] Valid variables for attempt report filename patterns */
-    public const ATTEMPT_FILENAME_PATTERN_VARIABLES = [
-        'courseid',
-        'coursename',
-        'courseshortname',
-        'cmid',
-        'groupids',
-        'groupidnumbers',
-        'groupnames',
-        'quizid',
-        'quizname',
-        'attemptid',
-        'username',
-        'firstname',
-        'lastname',
-        'idnumber',
-        'timestart',
-        'timefinish',
-        'date',
-        'time',
-        'timestamp',
-    ];
-
-    /** @var string[] Valid variables for attempt folder name patterns */
-    public const ATTEMPT_FOLDERNAME_PATTERN_VARIABLES = self::ATTEMPT_FILENAME_PATTERN_VARIABLES;
-
     /**
      * Creates a new attempt report
      *

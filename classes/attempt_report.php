@@ -25,6 +25,7 @@
 namespace archivingmod_quiz;
 
 use curl;
+use local_archiving\type\image_type;
 use mod_quiz\quiz_attempt;
 
 // @codingStandardsIgnoreLine
@@ -35,36 +36,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Quiz attempt report renderer
  */
 class attempt_report {
-
-    /** @var array Sections that can be included in the report */
-    public const SECTIONS = [
-        "header",
-        "quiz_feedback",
-        "question",
-        "question_feedback",
-        "general_feedback",
-        "rightanswer",
-        "history",
-        "attachments",
-    ];
-
-    /** @var array Dependencies of report sections */
-    public const SECTION_DEPENDENCIES = [
-        "header" => [],
-        "question" => [],
-        "quiz_feedback" => ["header"],
-        "question_feedback" => ["question"],
-        "general_feedback" => ["question"],
-        "rightanswer" => ["question"],
-        "history" => ["question"],
-        "attachments" => ["question"],
-    ];
-
-    /** @var string[] Available paper formats for attempt PDFs */
-    public const PAPER_FORMATS = [
-        'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
-        'Letter', 'Legal', 'Tabloid', 'Ledger',
-    ];
 
     // @codingStandardsIgnoreStart
     /** @var string Regex for URLs of qtype_stack plots */
@@ -79,19 +50,6 @@ class attempt_report {
     /** @var string Regex for Moodle theme image files */
     protected const REGEX_MOODLE_URL_THEME_IMAGE = '/^(?P<wwwroot>https?:\/\/.+)?(\/theme\/image\.php\/)(?P<themename>[^\/]+)\/(?P<component>[^\/]+)\/(?P<rev>[^\/]+)\/(?P<image>.+)$/m';
     // @codingStandardsIgnoreEnd
-
-    /** @var string[] Mapping of file extensions to file types that are allowed to process */
-    public const ALLOWED_IMAGE_TYPES = [
-        'png' => 'image/png',
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'svg' => 'image/svg+xml',
-        'gif' => 'image/gif',
-        'webp' => 'image/webp',
-        'bmp' => 'image/bmp',
-        'ico' => 'image/x-icon',
-        'tiff' => 'image/tiff',
-    ];
 
     /**
      * Creates a new attempt report
@@ -442,7 +400,8 @@ class attempt_report {
 
         // Only process allowed image types.
         $imgext = strtolower(pathinfo($imgsrcurl, PATHINFO_EXTENSION));
-        if (!array_key_exists($imgext, self::ALLOWED_IMAGE_TYPES)) {
+        $imgtype = image_type::from_extension($imgext);
+        if (!$imgtype) {
             // Edge case: Moodle theme images must not always contain extensions.
             if (!preg_match(self::REGEX_MOODLE_URL_THEME_IMAGE, $imgsrcurl)) {
                 $img->setAttribute('x-debug-notice', 'image type not allowed');
@@ -453,10 +412,10 @@ class attempt_report {
         // Try to get image content based on link type.
         $regexmatches = null;
         $imgdata = null;
-        $imgmime = array_key_exists($imgext, self::ALLOWED_IMAGE_TYPES) ? self::ALLOWED_IMAGE_TYPES[$imgext] : null;
+        $imgmime = $imgtype?->mimetype();
 
         // Handle special internal URLs first.
-        $isinternalurl = substr($imgsrcurl, 0, strlen($moodlebaseurl)) === $moodlebaseurl;
+        $isinternalurl = str_starts_with($imgsrcurl, $moodlebaseurl);
         if ($isinternalurl) {
             if (preg_match(self::REGEX_MOODLE_URL_PLUGINFILE, $imgsrcurl, $regexmatches)) {
                 // Link type: Moodle pluginfile URL.
@@ -536,7 +495,7 @@ class attempt_report {
             // Check if we need to detect mime type from response headers.
             if (!$imgmime) {
                 $imgmime = $c->get_info()['content_type'];
-                if (!in_array($imgmime, self::ALLOWED_IMAGE_TYPES)) {
+                if (!image_type::from_mimetype($imgmime)) {
                     $img->setAttribute('x-debug-notice', 'image type from response header is not allowed');
                     return false;
                 }
