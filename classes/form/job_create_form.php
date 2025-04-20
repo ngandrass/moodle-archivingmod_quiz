@@ -24,7 +24,6 @@
 
 namespace archivingmod_quiz\form;
 
-use archivingmod_quiz\attempt_report;
 use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use local_archiving\storage;
