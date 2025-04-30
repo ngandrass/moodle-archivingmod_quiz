@@ -65,7 +65,8 @@ class generate_attempt_report extends external_api {
             ),
             'foldernamepattern' => new external_value(
                 PARAM_TEXT,
-                'Folder name pattern to use for generating the attempt folder'
+                'Folder name pattern to use for generating the attempt folder',
+                VALUE_REQUIRED
             ),
             'filenamepattern' => new external_value(
                 PARAM_TEXT,

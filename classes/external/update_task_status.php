@@ -65,7 +65,8 @@ class update_task_status extends external_api {
             'progress' => new external_value(
                 PARAM_INT,
                 'Number between 0 and 100 that indicates the current progress of the task',
-                VALUE_OPTIONAL,
+                VALUE_DEFAULT,
+                null,
             ),
         ]);
     }
@@ -79,7 +80,8 @@ class update_task_status extends external_api {
         return new external_single_structure([
             'status' => new external_value(
                 PARAM_TEXT,
-                'Status of the executed wsfunction'
+                'Status of the executed wsfunction',
+                VALUE_REQUIRED
             ),
         ]);
     }
