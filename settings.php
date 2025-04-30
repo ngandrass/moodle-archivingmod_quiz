@@ -22,8 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use archivingmod_quiz\attempt_report;
-use archivingmod_quiz\quiz;
+use archivingmod_quiz\local\autoinstall;
 use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
@@ -46,11 +45,10 @@ if ($hassiteconfig) {
             get_string('setting_header_docs_desc', 'archivingmod_quiz')
         ));
 
-        /*
         // Autoinstall.
         if (autoinstall::plugin_is_unconfigured()) {
             // @codingStandardsIgnoreStart
-            $autoinstallurl = new moodle_url('/mod/quiz/report/archiver/adminui/autoinstall.php');
+            $autoinstallurl = new moodle_url('/local/archiving/driver/mod/quiz/autoinstall.php');
             $autoinstalldesc = "<a href='{$autoinstallurl}' class='btn btn-primary'>".get_string('autoinstall_start_now', 'archivingmod_quiz')."</a>";
             $autoinstalldesc .= "<br><br><p>".get_string('autoinstall_explanation', 'archivingmod_quiz')."</p>";
             // @codingStandardsIgnoreEnd
@@ -61,7 +59,6 @@ if ($hassiteconfig) {
             get_string('setting_autoconfigure', 'archivingmod_quiz'),
             $autoinstalldesc
         ));
-        */
 
         // Worker service.
         $settings->add(new admin_setting_heading('archivingmod_quiz/header_archive_worker',

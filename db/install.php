@@ -32,5 +32,16 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Custom code to be run on installing the plugin
  */
 function xmldb_archivingmod_quiz_install() {
+    // Print hint for autoinstall feature.
+    $autoinstallurl = new moodle_url('/local/archiving/driver/mod/quiz/autoinstall.php');
+
+    echo '<div class="alert alert-info" role="alert">';
+    echo '<p>'.get_string('autoinstall_explanation', 'archivingmod_quiz')."</p>";
+    echo '<p><a href='.$autoinstallurl.' class="btn btn-primary text-white">'.
+        get_string('autoinstall_start_now', 'archivingmod_quiz').
+        '</a></p>';
+    echo '<p>'.get_string('manual_configuration_continue', 'archivingmod_quiz').'</p>';
+    echo '</div>';
+
     return true;
 }
