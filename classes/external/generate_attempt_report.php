@@ -28,6 +28,8 @@ namespace archivingmod_quiz\external;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+use archivingmod_quiz\attempt_report;
+use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use archivingmod_quiz\type\webservice_status;
 use core_external\external_api;
@@ -35,6 +37,8 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
+use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\storage;
 
 /**
  * API endpoint to generate a quiz attempt report as part of an activity
@@ -203,79 +207,57 @@ class generate_attempt_report extends external_api {
             'attachments' => $attachmentsraw,
         ]);
 
-        return ['status' => webservice_status::OK->name];
-
-        /*
-        // Validate that the jobid exists.
+        // Find the task.
         try {
-            $job = ArchiveJob::get_by_jobid($params['jobuuid']);
+            $task = activity_archiving_task::get_by_id($params['taskid']);
         } catch (\dml_exception $e) {
-            return ['status' => 'E_JOB_NOT_FOUND'];
+            return ['status' => webservice_status::E_TASK_NOT_FOUND->name];
         }
 
         // Check access rights.
-        if (!$job->has_read_access(optional_param('wstoken', null, PARAM_TEXT))) {
-            return ['status' => 'E_ACCESS_DENIED'];
+        if (!$task->get_webservice_token() === optional_param('wstoken', null, PARAM_TEXT)) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
-
-        // Check capabilities.
-        try {
-            $context = \context_module::instance($params['cmid']);
-        } catch (\dml_exception $e) {
-            throw new \invalid_parameter_exception("No module context with given cmid found");
-        }
-        require_capability('mod/archivingmod_quiz:use_webservice', $context);
 
         // Acquire required data objects.
         if (!$course = $DB->get_record('course', ['id' => $params['courseid']])) {
             throw new \invalid_parameter_exception("No course with given courseid found");
         }
-        if (!$cm = get_coursemodule_from_id("quiz", $params['cmid'])) {
-            // @codeCoverageIgnoreStart
-            // This should be covered by the context query above but stays as a safeguard nonetheless.
+        list($course, $cm) = get_course_and_cm_from_cmid($params['cmid'], 'quiz', $course);
+        if (!$cm) {
             throw new \invalid_parameter_exception("No course module with given cmid found");
-            // @codeCoverageIgnoreEnd
-        }
-        if (!$quiz = $DB->get_record('quiz', ['id' => $params['quizid']])) {
-            throw new \invalid_parameter_exception("No quiz with given quizid found");
         }
 
         // Validate folder and filename pattern.
-        if (!ArchiveJob::is_valid_attempt_foldername_pattern($params['foldernamepattern'])) {
-            throw new \invalid_parameter_exception("Invalid foldername pattern");
+        if (!storage::is_valid_filename_pattern(
+            $params['foldernamepattern'],
+            attempt_filename_variable::values(),
+            storage::FOLDERNAME_FORBIDDEN_CHARACTERS
+        )) {
+            throw new \invalid_parameter_exception("Invalid folder name pattern");
         }
-        if (!ArchiveJob::is_valid_attempt_filename_pattern($params['filenamepattern'])) {
-            throw new \invalid_parameter_exception("Report filename pattern is invalid");
+        if (!storage::is_valid_filename_pattern(
+            $params['filenamepattern'],
+            attempt_filename_variable::values(),
+            storage::FILENAME_FORBIDDEN_CHARACTERS
+        )) {
+            throw new \invalid_parameter_exception("Invalid filename pattern");
         }
 
-        // Prepare response.
+        // Forcefully set URL in $PAGE to the webservice handler to prevent future warnings.
+        $PAGE->set_url(new \moodle_url('/webservice/rest/server.php', [
+            'wsfunction' => 'archivingmod_quiz_generate_attempt_report',
+        ]));
+
+        // Generate attempt report as HTML.
+        $report = new attempt_report($course, $cm);
         $res = [
-            'courseid' => $params['courseid'],
-            'cmid' => $params['cmid'],
-            'quizid' => $params['quizid'],
             'attemptid' => $params['attemptid'],
+            'report' => $report->generate_full_page($params['attemptid'], $params['sections']),
         ];
 
-        // Forcefully set URL in $PAGE to the webservice handler to prevent further warnings.
-        $PAGE->set_url(new \moodle_url('/webservice/rest/server.php', ['wsfunction' => 'archivingmod_quiz_generate_attempt_report']));
-
-        // The following code is tested covered by more specific tests.
-        // @codingStandardsIgnoreLine
-        // @codeCoverageIgnoreStart
-
-        // Generate report.
-        $report = new Report($course, $cm, $quiz);
-        if (!$report->has_access(optional_param('wstoken', null, PARAM_TEXT))) {
-            return [
-                'status' => 'E_ACCESS_DENIED',
-            ];
-        }
-        if (!$report->attempt_exists($params['attemptid'])) {
-            throw new \invalid_parameter_exception("No attempt with given attemptid found");
-        }
-
-        $res['report'] = $report->generate_full_page($params['attemptid'], $params['sections']);
-
+        // TODO: Implement the functions below!
+        /*
         // Check for attachments.
         if ($params['attachments']) {
             $res['attachments'] = $report->get_attempt_attachments_metadata($params['attemptid']);
@@ -305,12 +287,12 @@ class generate_attempt_report extends external_api {
             $params['attemptid'],
             $params['filenamepattern']
         );
+        */
 
         // Return response.
-        $res['status'] = 'OK';
+        $res['status'] = webservice_status::OK->name;
 
         return $res;
-        */
     }
 
 }

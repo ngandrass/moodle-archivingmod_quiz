@@ -43,4 +43,7 @@ enum webservice_status {
     /** @var self Access to the requested resource was denied */
     case E_ACCESS_DENIED;
 
+    /** @var self Invalid parameter received */
+    case E_INVALID_PARAM;
+
 }
