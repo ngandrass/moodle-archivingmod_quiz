@@ -24,9 +24,12 @@
 
 namespace archivingmod_quiz;
 
+use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use curl;
+use local_archiving\storage;
 use local_archiving\type\image_type;
+use local_archiving\util\course_util;
 use mod_quiz\quiz_attempt;
 
 // @codingStandardsIgnoreLine
@@ -37,6 +40,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Quiz attempt report renderer
  */
 class attempt_report {
+
+    /** @var \stdClass Quiz instance this attempt report handler is associated with */
+    protected \stdClass $quiz;
 
     // @codingStandardsIgnoreStart
     /** @var string Regex for URLs of qtype_stack plots */
@@ -55,12 +61,23 @@ class attempt_report {
     /**
      * Creates a new attempt report
      *
+     * @param \stdClass $course Course this renderer is associated with
      * @param $cm \cm_info Course module this renderer is associated with
+     * @throws \dml_exception If no valid quiz can be found for the given course module
      */
     public function __construct(
         protected \stdClass $course,
         protected \cm_info $cm
     ) {
+        global $DB;
+
+        // Check cm type.
+        if ($this->cm->modname !== 'quiz') {
+            throw new \moodle_exception('Invalid course module type');
+        }
+
+        // Retrieve quiz instance.
+        $this->quiz = $DB->get_record('quiz', ['id' => $this->cm->instance], '*', MUST_EXIST);
     }
 
     /**
@@ -84,7 +101,13 @@ class attempt_report {
         // Get quiz data and determine state / elapsed time.
         $attemptobj = quiz_create_attempt_handling_errors($attemptid, $this->cm->id);
         $attempt = $attemptobj->get_attempt();
+
         $quiz = $attemptobj->get_quiz();
+        if ($quiz->id != $this->quiz->id) {
+            // This should never happen and already be caught by quiz_create_attempt_handling_errors but let's be sure.
+            throw new \moodle_exception('Quiz instance from attempt does not match quiz instance from course module');
+        }
+
         $quba = \question_engine::load_questions_usage_by_activity($attemptobj->get_uniqueid());
         $quba->preload_all_step_users();
         $options = \mod_quiz\question\display_options::make_from_quiz($quiz, quiz_attempt_state($quiz, $attempt));
@@ -559,6 +582,73 @@ class attempt_report {
 
         // Absolute URL is ready!
         return $scheme.'://'.$abs;
+    }
+
+    /**
+     * Generates an attempt file- or foldername based on the given pattern and
+     * context information
+     *
+     * @param int $attemptid ID of the attempt
+     * @param string $pattern Filename pattern to use
+     * @param bool $isfoldername If true, the filename will be treated as a folder name
+     * @return string Filename with substituted variables
+     * @throws \dml_exception If the attempt or user could not be found in the database
+     * @throws \invalid_parameter_exception If the pattern is invalid
+     * @throws \coding_exception
+     */
+    public function generate_attempt_filename(int $attemptid, string $pattern, bool $isfoldername = false): string {
+        global $DB;
+
+        // Validate pattern.
+        $allowedvariables = attempt_filename_variable::values();
+        if ($isfoldername) {
+            if (!storage::is_valid_filename_pattern($pattern, $allowedvariables, storage::FOLDERNAME_FORBIDDEN_CHARACTERS)) {
+                throw new \invalid_parameter_exception(get_string('error_invalid_attempt_foldername_pattern', 'archivingmod_quiz'));
+            }
+        } else {
+            if (!storage::is_valid_filename_pattern($pattern, $allowedvariables, storage::FILENAME_FORBIDDEN_CHARACTERS)) {
+                throw new \invalid_parameter_exception(get_string('error_invalid_attempt_filename_pattern', 'archivingmod_quiz'));
+            }
+        }
+
+        // Prepare data.
+        // We query the DB directly to prevent a full question_attempt object from being created.
+        $attemptinfo = $DB->get_record('quiz_attempts', ['id' => $attemptid], '*', MUST_EXIST);
+        $userinfo = $DB->get_record('user', ['id' => $attemptinfo->userid], '*', MUST_EXIST);
+        $usergroups = course_util::get_user_groups($this->course->id, $userinfo->id);
+        $data = [
+            'courseid' => $this->course->id ?: 0,
+            'cmid' => $this->cm->id ?: 0,
+            'quizid' => $this->quiz->id ?: 0,
+            'attemptid' => $attemptid ?: 0,
+            'coursename' => $this->course->fullname ?: 'null',
+            'courseshortname' => $this->course->shortname ?: 'null',
+            'groupids' => join('-', array_map(fn($group) => $group->id, $usergroups)) ?: 0,
+            'groupidnumbers' => join('-', array_map(fn($group) => $group->idnumber ?: 'null', $usergroups)) ?: 0,
+            'groupnames' => join('-', array_map(fn($group) => $group->name, $usergroups)) ?: 'nogroup',
+            'quizname' => $this->quiz->name ?: 'null',
+            'timestamp' => time(),
+            'date' => date('Y-m-d'),
+            'time' => date('H-i-s'),
+            'timestart' => $attemptinfo->timestart ?: 0,
+            'timefinish' => $attemptinfo->timefinish ?: 0,
+            'username' => $userinfo->username ?: 'null',
+            'firstname' => $userinfo->firstname ?: 'null',
+            'lastname' => $userinfo->lastname ?: 'null',
+            'idnumber' => $userinfo->idnumber ?: 'null',
+        ];
+
+        // Substitute variables.
+        $filename = $pattern;
+        foreach ($data as $key => $value) {
+            $filename = preg_replace(
+                '/\$\{\s*'.$key.'\s*\}/m',
+                substr($value, 0, storage::FILENAME_VARIABLE_MAX_LENGTH),
+                $filename
+            );
+        }
+
+        return $isfoldername ? storage::sanitize_filename($filename) : storage::sanitize_foldername($filename);
     }
 
 }
