@@ -104,22 +104,22 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
         $status = $task->get_status();
 
         try {
-            if ($status == activity_archiving_task_status::STATUS_UNINITIALIZED) {
-                $status = activity_archiving_task_status::STATUS_CREATED;
+            if ($status == activity_archiving_task_status::UNINITIALIZED) {
+                $status = activity_archiving_task_status::CREATED;
             }
 
-            if ($status == activity_archiving_task_status::STATUS_CREATED) {
-                $status = activity_archiving_task_status::STATUS_AWAITING_PROCESSING;
+            if ($status == activity_archiving_task_status::CREATED) {
+                $status = activity_archiving_task_status::AWAITING_PROCESSING;
                 throw new yield_exception();
             }
 
-            if ($status == activity_archiving_task_status::STATUS_AWAITING_PROCESSING) {
-                $status = activity_archiving_task_status::STATUS_RUNNING;
+            if ($status == activity_archiving_task_status::AWAITING_PROCESSING) {
+                $status = activity_archiving_task_status::RUNNING;
                 $task->set_progress(0);
                 throw new yield_exception();
             }
 
-            if ($status == activity_archiving_task_status::STATUS_RUNNING) {
+            if ($status == activity_archiving_task_status::RUNNING) {
                 if ($task->get_progress() < 50) {
                     $task->set_progress(50);
                     throw new yield_exception();
@@ -127,17 +127,17 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
                     $task->set_progress(100);
                     throw new yield_exception();
                 } else {
-                    $status = activity_archiving_task_status::STATUS_FINALIZING;
+                    $status = activity_archiving_task_status::FINALIZING;
                 }
             }
 
-            if ($status == activity_archiving_task_status::STATUS_FINALIZING) {
+            if ($status == activity_archiving_task_status::FINALIZING) {
                 // FIXME: Replace dummy artifact file.
                 $fs = get_file_storage();
                 $artifact = $fs->create_file_from_string($task->generate_artifact_fileinfo('foo.txt'), 'hello world');
                 $task->link_artifact($artifact);
 
-                $status = activity_archiving_task_status::STATUS_FINISHED;
+                $status = activity_archiving_task_status::FINISHED;
             }
         } finally {
             $task->set_status($status);

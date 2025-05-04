@@ -55,7 +55,7 @@ final class update_task_status_test extends \advanced_testcase {
     protected function generate_valid_request(
         string $uuid,
         int $taskid,
-        activity_archiving_task_status $status = activity_archiving_task_status::STATUS_UNINITIALIZED,
+        activity_archiving_task_status $status = activity_archiving_task_status::UNINITIALIZED,
         int $progress = 0
     ): array {
         return [
@@ -255,58 +255,58 @@ final class update_task_status_test extends \advanced_testcase {
     public static function update_task_status_data_provider(): array {
         return [
             'Task Status: UNINITIALIZED -> CREATED' => [
-                activity_archiving_task_status::STATUS_UNINITIALIZED,
-                activity_archiving_task_status::STATUS_CREATED,
+                activity_archiving_task_status::UNINITIALIZED,
+                activity_archiving_task_status::CREATED,
                 webservice_status::OK,
             ],
             'Task Status: CREATED -> AWAITING_PROCESSING' => [
-                activity_archiving_task_status::STATUS_CREATED,
-                activity_archiving_task_status::STATUS_AWAITING_PROCESSING,
+                activity_archiving_task_status::CREATED,
+                activity_archiving_task_status::AWAITING_PROCESSING,
                 webservice_status::OK,
             ],
             'Task Status: AWAITING_PROCESSING -> RUNNING' => [
-                activity_archiving_task_status::STATUS_AWAITING_PROCESSING,
-                activity_archiving_task_status::STATUS_RUNNING,
+                activity_archiving_task_status::AWAITING_PROCESSING,
+                activity_archiving_task_status::RUNNING,
                 webservice_status::OK,
             ],
             'Task Status: RUNNING -> FINALIZING' => [
-                activity_archiving_task_status::STATUS_RUNNING,
-                activity_archiving_task_status::STATUS_FINALIZING,
+                activity_archiving_task_status::RUNNING,
+                activity_archiving_task_status::FINALIZING,
                 webservice_status::OK,
             ],
             'Task Status: FINALIZING -> FINISHED' => [
-                activity_archiving_task_status::STATUS_FINALIZING,
-                activity_archiving_task_status::STATUS_FINISHED,
+                activity_archiving_task_status::FINALIZING,
+                activity_archiving_task_status::FINISHED,
                 webservice_status::OK,
             ],
             'Task Status: AWAITING_PROCESSING -> CANCELED' => [
-                activity_archiving_task_status::STATUS_AWAITING_PROCESSING,
-                activity_archiving_task_status::STATUS_CANCELED,
+                activity_archiving_task_status::AWAITING_PROCESSING,
+                activity_archiving_task_status::CANCELED,
                 webservice_status::OK,
             ],
             'Task Status: RUNNING -> TIMEOUT' => [
-                activity_archiving_task_status::STATUS_RUNNING,
-                activity_archiving_task_status::STATUS_TIMEOUT,
+                activity_archiving_task_status::RUNNING,
+                activity_archiving_task_status::TIMEOUT,
                 webservice_status::OK,
             ],
             'Task Status: UNINITIALIZED -> UNKNOWN' => [
-                activity_archiving_task_status::STATUS_UNINITIALIZED,
-                activity_archiving_task_status::STATUS_UNKNOWN,
+                activity_archiving_task_status::UNINITIALIZED,
+                activity_archiving_task_status::UNKNOWN,
                 webservice_status::OK,
             ],
             'Task Status: FINISHED -> TIMEOUT' => [
-                activity_archiving_task_status::STATUS_FINISHED,
-                activity_archiving_task_status::STATUS_TIMEOUT,
+                activity_archiving_task_status::FINISHED,
+                activity_archiving_task_status::TIMEOUT,
                 webservice_status::E_ALREADY_COMPLETED,
             ],
             'Task Status: CANCELED -> RUNNING' => [
-                activity_archiving_task_status::STATUS_CANCELED,
-                activity_archiving_task_status::STATUS_RUNNING,
+                activity_archiving_task_status::CANCELED,
+                activity_archiving_task_status::RUNNING,
                 webservice_status::E_ALREADY_COMPLETED,
             ],
             'Task Status: TIMEOUT -> RUNNING' => [
-                activity_archiving_task_status::STATUS_TIMEOUT,
-                activity_archiving_task_status::STATUS_RUNNING,
+                activity_archiving_task_status::TIMEOUT,
+                activity_archiving_task_status::RUNNING,
                 webservice_status::E_ALREADY_COMPLETED,
             ],
         ];
@@ -333,13 +333,13 @@ final class update_task_status_test extends \advanced_testcase {
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-4';
         $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
-        $mocks->task->set_status(activity_archiving_task_status::STATUS_RUNNING);
+        $mocks->task->set_status(activity_archiving_task_status::RUNNING);
 
         // Prepare request.
         $r = $this->generate_valid_request(
             '40000000-0000-0000-0000-0123456789ab',
             $mocks->task->get_id(),
-            activity_archiving_task_status::STATUS_RUNNING,
+            activity_archiving_task_status::RUNNING,
             $progress
         );
         $_GET['wstoken'] = $wstoken;
