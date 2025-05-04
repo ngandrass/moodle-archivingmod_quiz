@@ -27,6 +27,7 @@ namespace archivingmod_quiz;
 // @codingStandardsIgnoreLine
 global $CFG;
 
+use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 
 require_once($CFG->dirroot . '/mod/quiz/report/archiver/patch_401_class_renames.php');
@@ -410,5 +411,243 @@ final class attempt_report_test extends \advanced_testcase {
         );
     }
 
-}
+    /**
+     * Test generation of valid attempt folder names
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_foldername(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
 
+        // Full pattern.
+        $fullpattern = 'attempt';
+        foreach (attempt_filename_variable::values() as $var) {
+            $fullpattern .= '-${'.$var.'}';
+        }
+        $foldername = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: $fullpattern,
+            isfoldername: true
+        );
+        $this->assertStringContainsString($rc->course->id, $foldername, 'Course ID was not found in folder name');
+        $this->assertStringContainsString($rc->cm->id, $foldername, 'Course module ID was not found in folder name');
+        $this->assertStringContainsString($rc->quiz->id, $foldername, 'Quiz ID was not found in folder name');
+        $this->assertStringContainsString($rc->course->fullname, $foldername, 'Course name was not found in folder name');
+        $this->assertStringContainsString($rc->course->shortname, $foldername, 'Course shortname was not found in folder name');
+        $this->assertStringContainsString($rc->quiz->name, $foldername, 'Quiz name was not found in folder name');
+        // TODO: (MDL-0) Update reference course to cover groups and check for these.
+        $this->assertStringContainsString('nogroup', $foldername, 'Group name placeholder was not found in folder name');
+        $this->assertStringContainsString($rc->attemptids[0], $foldername, 'Attempt ID was not found in folder name');
+
+        // Check that no unsubstituted variables are left.
+        foreach (attempt_filename_variable::values() as $var) {
+            $this->assertStringNotContainsString(
+                '${'.$var.'}',
+                $foldername,
+                "Unsubstituted variable '{$var}' found in folder name"
+            );
+        }
+    }
+
+    /**
+     * Test generation of attempt folder names without variables
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_foldername_without_variables(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        $foldername = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: 'attempt',
+            isfoldername: true
+        );
+        $this->assertSame('attempt', $foldername, 'Folder name was not generated correctly');
+    }
+
+    /**
+     * Test generation of attempt folder names with invalid patterns
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_foldername_invalid_pattern(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        // Test filename generation.
+        $this->expectException(\invalid_parameter_exception::class);
+        $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: '.',
+            isfoldername: true
+        );
+    }
+
+    /**
+     * Test generation of attempt folder names with invalid variables
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_foldername_invalid_variables(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        // Test filename generation.
+        $this->expectException(\invalid_parameter_exception::class);
+        $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: 'attempt-${foo}${bar}${baz}${courseid}',
+            isfoldername: true
+        );
+    }
+
+    /**
+     * Test generation of valid attempt filenames
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_filename(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        // Full pattern.
+        $fullpattern = 'attempt';
+        foreach (attempt_filename_variable::values() as $var) {
+            $fullpattern .= '-${'.$var.'}';
+        }
+        $filename = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: $fullpattern,
+            isfoldername: false
+        );
+        $this->assertStringContainsString($rc->course->id, $filename, 'Course ID was not found in filename');
+        $this->assertStringContainsString($rc->cm->id, $filename, 'Course module ID was not found in filename');
+        $this->assertStringContainsString($rc->quiz->id, $filename, 'Quiz ID was not found in filename');
+        $this->assertStringContainsString($rc->course->fullname, $filename, 'Course name was not found in filename');
+        $this->assertStringContainsString($rc->course->shortname, $filename, 'Course shortname was not found in filename');
+        $this->assertStringContainsString($rc->quiz->name, $filename, 'Quiz name was not found in filename');
+        // TODO: (MDL-0) Update reference course to cover groups and check for these.
+        $this->assertStringContainsString('nogroup', $filename, 'Group name placeholder was not found in filename');
+        $this->assertStringContainsString($rc->attemptids[0], $filename, 'Attempt ID was not found in filename');
+
+        // Check that no unsubstituted variables are left.
+        foreach (attempt_filename_variable::values() as $var) {
+            $this->assertStringNotContainsString(
+                '${'.$var.'}',
+                $filename,
+                "Unsubstituted variable '{$var}' found in filename"
+            );
+        }
+    }
+
+    /**
+     * Test generation of attempt filenames without variables
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_filename_without_variables(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        $filename = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: 'attempt',
+            isfoldername: false
+        );
+        $this->assertSame('attempt', $filename, 'Filename was not generated correctly');
+    }
+
+    /**
+     * Test generation of attempt filenames with invalid patterns
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_filename_invalid_pattern(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        // Test filename generation.
+        $this->expectException(\invalid_parameter_exception::class);
+        $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: '.',
+            isfoldername: false
+        );
+    }
+
+    /**
+     * Test generation of attempt filenames with invalid variables
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_filename_invalid_variables(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+        $report = new attempt_report($rc->course, $rc->cm);
+
+        // Test filename generation.
+        $this->expectException(\invalid_parameter_exception::class);
+        $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: 'attempt-${foo}${bar}${baz}${courseid}',
+            isfoldername: false
+        );
+    }
+}
