@@ -241,6 +241,10 @@ class generate_attempt_report extends external_api {
             return ['status' => webservice_status::E_ATTEMPT_NOT_FOUND->name];
         }
 
+        // The following code is tested covered by more specific tests.
+        // @codingStandardsIgnoreLine
+        // @codeCoverageIgnoreStart
+
         // Forcefully set URL in $PAGE to the webservice handler to prevent future warnings.
         $PAGE->set_url(new \moodle_url('/webservice/rest/server.php', [
             'wsfunction' => 'archivingmod_quiz_generate_attempt_report',
@@ -284,6 +288,8 @@ class generate_attempt_report extends external_api {
         $res['status'] = webservice_status::OK->name;
 
         return $res;
+        // @codingStandardsIgnoreLine
+        // @codeCoverageIgnoreEnd
     }
 
 }
