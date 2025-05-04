@@ -72,6 +72,18 @@ class quiz_manager {
     }
 
     /**
+     * Create a new quiz manager based on the given module context
+     *
+     * @param \context_module $ctx Module context to create the quiz manager for
+     * @return self New quiz manager instance
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function from_context(\context_module $ctx): self {
+        return new self($ctx->get_course_context()->instanceid, $ctx->instanceid);
+    }
+
+    /**
      * Creates a new attempt_report instance that is associated with this quiz
      *
      * @return attempt_report New attempt_report instance
@@ -80,6 +92,33 @@ class quiz_manager {
      */
     public function attempt_report(): attempt_report {
         return new attempt_report($this->course, $this->cm, $this->quiz);
+    }
+
+    /**
+     * Returns the quiz object this instance is associated with
+     *
+     * @return \stdClass Quiz object this instance is associated with
+     */
+    public function get_quiz(): \stdClass {
+        return $this->quiz;
+    }
+
+    /**
+     * Returns the course module info object this instance is associated with
+     *
+     * @return \cm_info Course module info object this instance is associated with
+     */
+    public function get_cm(): \cm_info {
+        return $this->cm;
+    }
+
+    /**
+     * Returns the course object this instance is associated with
+     *
+     * @return \stdClass Course object this instance is associated with
+     */
+    public function get_course(): \stdClass {
+        return $this->course;
     }
 
     /**
