@@ -28,7 +28,7 @@ namespace archivingmod_quiz\external;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
-use archivingmod_quiz\attempt_report;
+use archivingmod_quiz\quiz_manager;
 use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use archivingmod_quiz\type\webservice_status;
@@ -194,7 +194,7 @@ class generate_attempt_report extends external_api {
         array  $sectionsraw,
         bool   $attachmentsraw
     ): array {
-        global $DB, $PAGE;
+        global $PAGE;
 
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
@@ -215,17 +215,17 @@ class generate_attempt_report extends external_api {
         }
 
         // Check access rights.
-        if (!$task->get_webservice_token() === optional_param('wstoken', null, PARAM_TEXT)) {
+        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
         // Acquire required data objects.
-        if (!$course = $DB->get_record('course', ['id' => $params['courseid']])) {
-            throw new \invalid_parameter_exception("No course with given courseid found");
+        list($course, $cm) = get_course_and_cm_from_cmid($task->get_context()->instanceid, 'quiz');
+        if (!$course) {
+            return ['status' => webservice_status::E_COURSE_NOT_FOUND->name];
         }
-        list($course, $cm) = get_course_and_cm_from_cmid($params['cmid'], 'quiz', $course);
         if (!$cm) {
-            throw new \invalid_parameter_exception("No course module with given cmid found");
+            return ['status' => webservice_status::E_CM_NOT_FOUND->name];
         }
 
         // Validate folder and filename pattern.
@@ -234,14 +234,20 @@ class generate_attempt_report extends external_api {
             attempt_filename_variable::values(),
             storage::FOLDERNAME_FORBIDDEN_CHARACTERS
         )) {
-            throw new \invalid_parameter_exception("Invalid folder name pattern");
+            return ['status' => webservice_status::E_INVALID_FOLDERNAME_PATTERN->name];
         }
         if (!storage::is_valid_filename_pattern(
             $params['filenamepattern'],
             attempt_filename_variable::values(),
             storage::FILENAME_FORBIDDEN_CHARACTERS
         )) {
-            throw new \invalid_parameter_exception("Invalid filename pattern");
+            return ['status' => webservice_status::E_INVALID_FILENAME_PATTERN->name];
+        }
+
+        // Ensure that requested attempt exists in quiz.
+        $quiz = new quiz_manager($course->id, $cm->id);
+        if (!$quiz->attempt_exists($params['attemptid'])) {
+            return ['status' => webservice_status::E_ATTEMPT_NOT_FOUND->name];
         }
 
         // Forcefully set URL in $PAGE to the webservice handler to prevent future warnings.

@@ -37,13 +37,26 @@ enum webservice_status {
     /** @var self Success */
     case OK;
 
-    /** @var self No task with given taskid was found */
-    case E_TASK_NOT_FOUND;
-
     /** @var self Access to the requested resource was denied */
     case E_ACCESS_DENIED;
 
     /** @var self Invalid parameter received */
     case E_INVALID_PARAM;
+
+    /** @var self No task with given taskid was found */
+    case E_TASK_NOT_FOUND;
+
+    case E_COURSE_NOT_FOUND;
+
+    case E_CM_NOT_FOUND;
+
+    case E_QUIZ_NOT_FOUND;
+
+    /** @var self No attempt was found with the given ID */
+    case E_ATTEMPT_NOT_FOUND;
+
+    case E_INVALID_FOLDERNAME_PATTERN;
+
+    case E_INVALID_FILENAME_PATTERN;
 
 }
