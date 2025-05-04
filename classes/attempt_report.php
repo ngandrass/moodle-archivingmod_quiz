@@ -41,11 +41,11 @@ require_once("$CFG->dirroot/mod/quiz/locallib.php");  // @codeCoverageIgnore
 
 /**
  * Quiz attempt report renderer
+ *
+ * This class handles everything related to getting information for a specific
+ * attempt out of a given quiz and rendering it as HTML.
  */
 class attempt_report {
-
-    /** @var \stdClass Quiz instance this attempt report handler is associated with */
-    protected \stdClass $quiz;
 
     // @codingStandardsIgnoreStart
     /** @var string Regex for URLs of qtype_stack plots */
@@ -62,25 +62,29 @@ class attempt_report {
     // @codingStandardsIgnoreEnd
 
     /**
-     * Creates a new attempt report
+     * Creates a new attempt report renderer
      *
      * @param \stdClass $course Course this renderer is associated with
      * @param $cm \cm_info Course module this renderer is associated with
      * @throws \dml_exception If no valid quiz can be found for the given course module
+     * @throws \moodle_exception If the given course module is not a quiz
      */
     public function __construct(
         protected \stdClass $course,
-        protected \cm_info $cm
+        protected \cm_info $cm,
+        protected \stdClass $quiz
     ) {
-        global $DB;
-
-        // Check cm type.
+        // Check cm.
+        if ($this->cm->course != $this->course->id) {
+            throw new \moodle_exception('Course module not part of course');
+        }
         if ($this->cm->modname !== 'quiz') {
             throw new \moodle_exception('Invalid course module type');
         }
 
-        // Retrieve quiz instance.
-        $this->quiz = $DB->get_record('quiz', ['id' => $this->cm->instance], '*', MUST_EXIST);
+        if ($this->cm->instance != $this->quiz->id) {
+            throw new \moodle_exception('Invalid quiz instance');
+        }
     }
 
     /**

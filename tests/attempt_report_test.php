@@ -65,7 +65,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate full report with all sections.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $html = $report->generate($rc->attemptids[0], attempt_report_section::cases());
         $this->assertNotEmpty($html, 'Generated report is empty');
 
@@ -149,7 +149,7 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_full_page_stub(): void {
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $html = $report->generate_full_page(
             $rc->attemptids[0],
             attempt_report_section::cases(),
@@ -175,7 +175,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without a header.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::HEADER,
         ]));
@@ -213,7 +213,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without quiz feedback.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::GENERAL_FEEDBACK,
             attempt_report_section::QUESTION,
@@ -250,7 +250,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without questions.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::QUESTION,
         ]));
@@ -303,7 +303,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without question feedback.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::QUESTION_FEEDBACK,
         ]));
@@ -334,7 +334,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without general feedback.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::GENERAL_FEEDBACK,
         ]));
@@ -365,7 +365,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without right answers.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::CORRECT_ANSWER,
         ]));
@@ -396,7 +396,7 @@ final class attempt_report_test extends \advanced_testcase {
         $rc = $this->getDataGenerator()->import_reference_course();
 
         // Generate report without answer history.
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
             attempt_report_section::ANSWER_HISTORY,
         ]));
@@ -425,7 +425,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Full pattern.
         $fullpattern = 'attempt';
@@ -471,7 +471,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         $foldername = $report->generate_attempt_filename(
             attemptid: $rc->attemptids[0],
@@ -495,7 +495,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
         $this->expectException(\invalid_parameter_exception::class);
@@ -520,7 +520,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
         $this->expectException(\invalid_parameter_exception::class);
@@ -545,7 +545,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Full pattern.
         $fullpattern = 'attempt';
@@ -591,7 +591,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         $filename = $report->generate_attempt_filename(
             attemptid: $rc->attemptids[0],
@@ -615,7 +615,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
         $this->expectException(\invalid_parameter_exception::class);
@@ -640,7 +640,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate data.
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $report = new attempt_report($rc->course, $rc->cm);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
         $this->expectException(\invalid_parameter_exception::class);

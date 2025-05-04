@@ -49,7 +49,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to get the attempts of a quiz
      *
-     * @covers \archivingmod_quiz\quiz::get_attempts
+     * @covers \archivingmod_quiz\quiz_manager::get_attempts
      *
      * @return void
      * @throws \dml_exception
@@ -60,7 +60,7 @@ final class quiz_test extends \advanced_testcase {
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
 
-        $quiz = new quiz($rc->course->id, $rc->cm->id, $rc->quiz->id);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
         $attempts = $quiz->get_attempts();
 
         $this->assertNotEmpty($attempts, 'No attempts found');
@@ -70,7 +70,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to get the attempt metadata array for a quiz
      *
-     * @covers \archivingmod_quiz\quiz::get_attempts_metadata
+     * @covers \archivingmod_quiz\quiz_manager::get_attempts_metadata
      *
      * @return void
      * @throws \dml_exception
@@ -80,7 +80,7 @@ final class quiz_test extends \advanced_testcase {
     public function test_get_attempts_metadata(): void {
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $quiz = new quiz($rc->course->id, $rc->cm->id, $rc->quiz->id);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
 
         // Test without filters.
         $attempts = $quiz->get_attempts_metadata();
@@ -115,7 +115,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to retrieve existing and nonexisting attempts
      *
-     * @covers \archivingmod_quiz\quiz::attempt_exists
+     * @covers \archivingmod_quiz\quiz_manager::attempt_exists
      *
      * @return void
      * @throws \dml_exception
@@ -125,7 +125,7 @@ final class quiz_test extends \advanced_testcase {
     public function test_attempt_exists(): void {
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $quiz = new quiz($rc->course->id, $rc->cm->id, $rc->quiz->id);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
 
         $this->assertTrue($quiz->attempt_exists($rc->attemptids[0]), 'Existing attempt not found');
         $this->assertFalse($quiz->attempt_exists(-1), 'Non-existing attempt found');
@@ -134,7 +134,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to get the attachments of an attempt
      *
-     * @covers \archivingmod_quiz\quiz::get_attempt_attachments
+     * @covers \archivingmod_quiz\quiz_manager::get_attempt_attachments
      *
      * @return void
      * @throws \dml_exception
@@ -144,7 +144,7 @@ final class quiz_test extends \advanced_testcase {
     public function test_get_attempt_attachments(): void {
         $this->resetAfterTest();
         $rc = $this->getDataGenerator()->import_reference_course();
-        $quiz = new quiz($rc->course->id, $rc->cm->id, $rc->quiz->id);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
         $attachments = $quiz->get_attempt_attachments($rc->attemptids[0]);
         $this->assertNotEmpty($attachments, 'No attachments found');
 

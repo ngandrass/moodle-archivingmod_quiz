@@ -30,8 +30,11 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 /**
  * Quiz management class
+ *
+ * This class provides a high-level management interface for working with
+ * quizzes during the archiving process.
  */
-class quiz {
+class quiz_manager {
 
     /** @var \stdClass Course object this instance is associated with */
     protected \stdClass $course;
@@ -39,35 +42,44 @@ class quiz {
     /** @var \cm_info Course module info object this instance is associated with */
     protected \cm_info $cm;
 
-    /** @var object Moodle admin settings object */
-    protected object $config;
+    /** @var \stdClass Quiz object this instance is associated with */
+    protected \stdClass $quiz;
 
     /**
-     * Creates a new attempt report
+     * Creates a new quiz manager
      *
-     * @param int $courseid ID of the course the cm lives in
+     * @param int $courseid ID of the course the quiz lives in
      * @param int $cmid ID of the course module the quiz lives in
-     * @param int $quizid ID of the quiz this attempt report belongs to
      * @throws \dml_exception If the course or cm cannot be found
      * @throws \moodle_exception If the given arguments are invalid
      */
     public function __construct(
         protected int $courseid,
-        protected int $cmid,
-        protected int $quizid
+        protected int $cmid
     ) {
+        global $DB;
+
         // Validate arguments.
         list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'quiz');
+        $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
         if ($course->id != $courseid) {
             throw new \moodle_exception('invalidcourseid', 'local_archiving');
-        }
-        if ($cm->instance != $quizid) {
-            throw new \moodle_exception('invalidcmidorquizid', 'local_archiving');
         }
 
         $this->course = $course;
         $this->cm = $cm;
-        $this->config = get_config('quiz_archiver');
+        $this->quiz = $quiz;
+    }
+
+    /**
+     * Creates a new attempt_report instance that is associated with this quiz
+     *
+     * @return attempt_report New attempt_report instance
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function attempt_report(): attempt_report {
+        return new attempt_report($this->course, $this->cm, $this->quiz);
     }
 
     /**
