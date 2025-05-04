@@ -35,6 +35,9 @@ use mod_quiz\quiz_attempt;
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+// Required for legacy mod_quiz functions ...
+require_once("$CFG->dirroot/mod/quiz/locallib.php");  // @codeCoverageIgnore
+
 
 /**
  * Quiz attempt report renderer
