@@ -43,20 +43,37 @@ enum webservice_status {
     /** @var self Invalid parameter received */
     case E_INVALID_PARAM;
 
+    /** @var self Updating data failed */
+    case E_UPDATE_FAILED;
+
     /** @var self No task with given taskid was found */
     case E_TASK_NOT_FOUND;
 
+    /** @var self Course could not be found */
     case E_COURSE_NOT_FOUND;
 
+    /** @var self Course module could not be found */
     case E_CM_NOT_FOUND;
 
+    /** @var self Quiz could not be found */
     case E_QUIZ_NOT_FOUND;
 
     /** @var self No attempt was found with the given ID */
     case E_ATTEMPT_NOT_FOUND;
 
+    /** @var self Given foldername pattern was invalid */
     case E_INVALID_FOLDERNAME_PATTERN;
 
+    /** @var self Given filename pattern was invalid */
     case E_INVALID_FILENAME_PATTERN;
+
+    /** @var self Invalid status value given */
+    case E_INVALID_STATUS;
+
+    /** @var self Invalid progress value given */
+    case E_INVALID_PROGRESS;
+
+    /** @var self The task or job is already completed and can not be altered */
+    case E_ALREADY_COMPLETED;
 
 }

@@ -33,6 +33,8 @@ use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
+use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\type\activity_archiving_task_status;
 
 
 /**
@@ -98,6 +100,8 @@ class update_task_status extends external_api {
      * @throws \coding_exception
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function execute(
         string $uuidraw,
@@ -113,55 +117,43 @@ class update_task_status extends external_api {
             'progress' => $progressraw,
         ]);
 
-        // TODO
-        return ['status' => webservice_status::OK->name];
-
-        /*
-        try {
-            $job = ArchiveJob::get_by_jobid($params['jobid']);
-
-            // Check capabilities.
-            $context = \context_module::instance($job->get_cmid());
-            require_capability('mod/quiz_archiver:use_webservice', $context);
-
-            if ($job->is_complete()) {
-                return [
-                    'status' => 'E_JOB_ALREADY_COMPLETED',
-                ];
-            }
-
-            if (!$job->has_write_access(optional_param('wstoken', null, PARAM_TEXT))) {
-                return [
-                    'status' => 'E_ACCESS_DENIED',
-                ];
-            }
-
-            // Prepare statusextras.
-            $statusextras = null;
-            if ($params['statusextras']) {
-                $statusextras = json_decode($params['statusextras'], true, 16, JSON_THROW_ON_ERROR);
-            }
-
-            // Update job status.
-            $job->set_status(
-                $params['status'],
-                $statusextras
-            );
-        } catch (\dml_exception $e) {
-            return [
-                'status' => 'E_UPDATE_FAILED',
-            ];
-        } catch (\JsonException $e) {
-            return [
-                'status' => 'E_INVALID_STATUSEXTRAS_JSON',
-            ];
+        // Validate status.
+        $newstatus = activity_archiving_task_status::tryFrom($params['status']);
+        if (!$newstatus) {
+            return ['status' => webservice_status::E_INVALID_STATUS->name];
         }
 
-        // Report success.
-        return [
-            'status' => 'OK',
-        ];
-        */
+        // Validate progress.
+        if ($params['progress'] < 0 || $params['progress'] > 100) {
+            return ['status' => webservice_status::E_INVALID_PROGRESS->name];
+        }
+
+        // Find the task.
+        try {
+            $task = activity_archiving_task::get_by_id($params['taskid']);
+        } catch (\dml_exception $e) {
+            return ['status' => webservice_status::E_TASK_NOT_FOUND->name];
+        }
+
+        // Check access rights.
+        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
+        }
+
+        // Do not alter the status if the task is already completed.
+        if ($task->is_completed()) {
+            return ['status' => webservice_status::E_ALREADY_COMPLETED->name];
+        }
+
+        // Update status.
+        try {
+            $task->set_status($newstatus);
+            $task->set_progress($params['progress']);
+        } catch (\dml_exception $e) {
+            return ['status' => webservice_status::E_UPDATE_FAILED->name];
+        }
+
+        return ['status' => webservice_status::OK->name];
     }
 
 }
