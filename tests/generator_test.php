@@ -81,6 +81,34 @@ final class generator_test extends \advanced_testcase {
     }
 
     /**
+     * Tests the creation of a mock task and job
+     *
+     * @covers \archivingmod_quiz_generator::create_mock_task
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_mock_task(): void {
+        // Generate mock task and job.
+        $generator = self::getDataGenerator();
+        $this->resetAfterTest();
+        $mocks = $generator->create_mock_task('TEST-WSTOKEN');
+
+        // Verify task and job.
+        $this->assertNotEmpty($mocks->job, 'The job was not created');
+        $this->assertNotEmpty($mocks->task, 'The task was not created');
+        $this->assertSame($mocks->job->get_id(), $mocks->task->get_jobid(), 'The task is not linked to the correct job');
+        $this->assertEquals('TEST-WSTOKEN', $mocks->task->get_webservice_token(), 'The task wstoken is incorrect');
+
+        // Verify job context.
+        $this->assertEquals($mocks->context->id, $mocks->job->get_context()->id, 'The job context is incorrect');
+
+        // Verify task type.
+        $this->assertEquals('quiz', $mocks->task->get_archivingmodname(), 'The task type is incorrect');
+    }
+
+    /**
      * Tests the creation of an artifact file associated with a quiz
      *
      * @covers \archivingmod_quiz_generator::create_artifact_file
