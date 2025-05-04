@@ -24,6 +24,9 @@
 
 namespace archivingmod_quiz\type;
 
+use local_archiving\trait\enum_listable;
+
+
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -32,6 +35,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Sections that can be included in a quiz attempt report
  */
 enum attempt_report_section: string {
+    use enum_listable;
 
     /** @var string Quiz header containing various metadata */
     case HEADER = 'header';

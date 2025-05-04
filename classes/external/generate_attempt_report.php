@@ -256,44 +256,38 @@ class generate_attempt_report extends external_api {
         ]));
 
         // Generate attempt report as HTML.
-        $report = new attempt_report($course, $cm);
+        $report = $quiz->attempt_report();
         $res = [
             'attemptid' => $params['attemptid'],
             'report' => $report->generate_full_page($params['attemptid'], $params['sections']),
         ];
 
-        // TODO: Implement the functions below!
-        /*
         // Check for attachments.
         if ($params['attachments']) {
-            $res['attachments'] = $report->get_attempt_attachments_metadata($params['attemptid']);
+            $res['attachments'] = $quiz->get_attempt_attachments_metadata($params['attemptid']);
 
-            // Update attachment count in attempt metadata table.
-            $numattachments = count($res['attachments']);
+            // TODO: Update attachment count in attempt metadata table.
+            /*$numattachments = count($res['attachments']);
             $DB->set_field(ArchiveJob::ATTEMPTS_TABLE_NAME, 'numattachments', $numattachments, [
                 'jobid' => $job->get_id(),
                 'attemptid' => $params['attemptid'],
             ]);
+            */
         } else {
             $res['attachments'] = [];
         }
 
         // Generate folder- and filename.
-        $res['foldername'] = ArchiveJob::generate_attempt_foldername(
-            $course,
-            $cm,
-            $quiz,
-            $params['attemptid'],
-            $params['foldernamepattern']
+        $res['foldername'] = $report->generate_attempt_filename(
+            attemptid: $params['attemptid'],
+            pattern: $params['foldernamepattern'],
+            isfoldername: true
         );
-        $res['filename'] = ArchiveJob::generate_attempt_filename(
-            $course,
-            $cm,
-            $quiz,
-            $params['attemptid'],
-            $params['filenamepattern']
+        $res['filename'] = $report->generate_attempt_filename(
+            attemptid: $params['attemptid'],
+            pattern: $params['filenamepattern'],
+            isfoldername: false
         );
-        */
 
         // Return response.
         $res['status'] = webservice_status::OK->name;

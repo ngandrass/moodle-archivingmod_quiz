@@ -98,7 +98,7 @@ class quiz_manager {
             "FROM {quiz_attempts} " .
             "WHERE preview = 0 AND quiz = :quizid",
             [
-                "quizid" => $this->quizid,
+                "quizid" => $this->quiz->id,
             ]
         );
     }
@@ -127,7 +127,7 @@ class quiz_manager {
             "FROM {quiz_attempts} qa LEFT JOIN {user} u ON qa.userid = u.id " .
             "WHERE qa.preview = 0 AND qa.quiz = :quizid " . ($filterwhereclause ?? ''),
             [
-                "quizid" => $this->quizid,
+                "quizid" => $this->quiz->id,
             ]
         );
     }
@@ -145,7 +145,7 @@ class quiz_manager {
 
         return $DB->record_exists('quiz_attempts', [
             'id' => $attemptid,
-            'quiz' => $this->quizid,
+            'quiz' => $this->quiz->id,
             'preview' => 0,
         ]);
     }
@@ -181,6 +181,45 @@ class quiz_manager {
         }
 
         return $files;
+    }
+
+    /**
+     * Returns a list of metadata for all files that were attached to questions
+     * inside the given attempt to be used within the webservice API
+     *
+     * @param int $attemptid ID of the attempt to get the files from
+     * @return array containing the metadata of all files that are attached to
+     * the questions inside the given attempt.
+     *
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function get_attempt_attachments_metadata(int $attemptid): array {
+        $res = [];
+
+        foreach ($this->get_attempt_attachments($attemptid) as $attachment) {
+            $downloadurl = strval(\moodle_url::make_webservice_pluginfile_url(
+                $attachment['file']->get_contextid(),
+                $attachment['file']->get_component(),
+                $attachment['file']->get_filearea(),
+                "{$attachment['usageid']}/{$attachment['slot']}/{$attachment['file']->get_itemid()}",
+                /* ^-- YES, this is the abomination of a non-numeric itemid that question_attempt::get_response_file_url()
+                   creates while eating innocent programmers for breakfast ... */
+                $attachment['file']->get_filepath(),
+                $attachment['file']->get_filename()
+            ));
+
+            $res[] = (object) [
+                'slot' => $attachment['slot'],
+                'filename' => $attachment['file']->get_filename(),
+                'filesize' => $attachment['file']->get_filesize(),
+                'mimetype' => $attachment['file']->get_mimetype(),
+                'contenthash' => $attachment['file']->get_contenthash(),
+                'downloadurl' => $downloadurl,
+            ];
+        }
+
+        return $res;
     }
 
 }
