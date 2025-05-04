@@ -22,9 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace external;
+namespace archivingmod_quiz\external;
 
-use archivingmod_quiz\external\get_attempts_metadata;
 use archivingmod_quiz\type\webservice_status;
 
 

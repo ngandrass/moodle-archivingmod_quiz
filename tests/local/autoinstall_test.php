@@ -22,9 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local;
+namespace archivingmod_quiz\local;
 
-use archivingmod_quiz\local\autoinstall;
 
 /**
  * Tests for the autoinstall class

@@ -22,9 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace external;
+namespace archivingmod_quiz\external;
 
-use archivingmod_quiz\external\generate_attempt_report;
 use archivingmod_quiz\type\attempt_report_section;
 use archivingmod_quiz\type\webservice_status;
 
