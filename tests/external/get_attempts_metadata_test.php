@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for the generate_attempt_report external service
+ * Tests for the get_attempts_metadata external service
  *
  * @package   archivingmod_quiz
  * @copyright 2025 Niels Gandraß <niels@gandrass.de>
@@ -24,14 +24,14 @@
 
 namespace external;
 
-use archivingmod_quiz\external\generate_attempt_report;
-use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\external\get_attempts_metadata;
 use archivingmod_quiz\type\webservice_status;
 
+
 /**
- * Tests for the generate_attempt_report external service
+ * Tests for the get_attempts_metadata external service
  */
-final class generate_attempt_report_test extends \advanced_testcase {
+final class get_attempts_metadata_test extends \advanced_testcase {
 
     /**
      * Returns the data generator for the archivingmod_quiz plugin
@@ -48,25 +48,20 @@ final class generate_attempt_report_test extends \advanced_testcase {
      *
      * @param string $uuid Job UUID
      * @param int $taskid ID of the activity archiving task
-     * @param int $attemptid Attempt ID
      * @return array Valid request parameters
      */
-    protected function generate_valid_request(string $uuid, int $taskid, int $attemptid): array {
+    protected function generate_valid_request(string $uuid, int $taskid): array {
         return [
             'uuid' => $uuid,
             'taskid' => $taskid,
-            'attemptid' => $attemptid,
-            'foldernamepattern' => '${username}/${attemptid}-${date}_${time}',
-            'filenamepattern' => 'attempt-${username}-${attemptid}-${date}_${time}',
-            'sections' => array_fill_keys(attempt_report_section::values(), true),
-            'attachments' => true,
+            'attemptids' => [1, 2, 3, 4, 5],
         ];
     }
 
     /**
      * Tests that the parameter spec is specified correctly and produces no exception.
      *
-     * @covers \archivingmod_quiz\external\generate_attempt_report::execute_parameters
+     * @covers \archivingmod_quiz\external\get_attempts_metadata::execute_parameters
      *
      * @return void
      */
@@ -74,7 +69,7 @@ final class generate_attempt_report_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->assertInstanceOf(
             \core_external\external_function_parameters::class,
-            generate_attempt_report::execute_parameters(),
+            get_attempts_metadata::execute_parameters(),
             'The execute_parameters() method should return an external_function_parameters.'
         );
     }
@@ -82,22 +77,23 @@ final class generate_attempt_report_test extends \advanced_testcase {
     /**
      * Tests that the return parameters are specified correctly and produce no exception.
      *
-     * @covers \archivingmod_quiz\external\generate_attempt_report::execute_returns
+     * @covers \archivingmod_quiz\external\get_attempts_metadata::execute_returns
      *
      * @return void
      */
     public function test_assure_return_parameter_spec(): void {
         $this->assertInstanceOf(
             \core_external\external_description::class,
-            generate_attempt_report::execute_returns(),
+            get_attempts_metadata::execute_returns(),
             'The execute_returns() method should return an external_description.'
         );
     }
 
     /**
-     * Test wstoken validation
+     * Tests that only web service tokens with access to a task can request
+     * attempt metadata
      *
-     * @covers \archivingmod_quiz\external\generate_attempt_report::execute
+     * @covers \archivingmod_quiz\external\get_attempts_metadata::execute
      *
      * @return void
      * @throws \coding_exception
@@ -107,26 +103,19 @@ final class generate_attempt_report_test extends \advanced_testcase {
      * @throws \required_capability_exception
      */
     public function test_wstoken_access_check(): void {
-        // Gain webservice permission and create mocks.
+        // Create job.
         $this->resetAfterTest();
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-VALID';
         $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
-
-        // Generate a valid request.
-        $uuid = '30000000-0000-0000-0000-0123456789ab';
-        $r = $this->generate_valid_request($uuid, $mocks->task->get_id(), $mocks->attempts[0]->attemptid);
+        $r = $this->generate_valid_request('10000000-0000-0000-0000-000000000000', $mocks->task->get_id());
 
         // Check that correct wstoken allows access.
         $_GET['wstoken'] = $wstoken;
-        $res = generate_attempt_report::execute(
+        $res = get_attempts_metadata::execute(
             $r['uuid'],
             $r['taskid'],
-            $r['attemptid'],
-            $r['foldernamepattern'],
-            $r['filenamepattern'],
-            $r['sections'],
-            $r['attachments']
+            $r['attemptids'],
         );
         $this->assertNotSame(
             webservice_status::E_ACCESS_DENIED->name,
@@ -136,14 +125,10 @@ final class generate_attempt_report_test extends \advanced_testcase {
 
         // Check that incorrect wstoken is rejected.
         $_GET['wstoken'] = 'TEST-WS-TOKEN-INVALID';
-        $res = generate_attempt_report::execute(
+        $res = get_attempts_metadata::execute(
             $r['uuid'],
             $r['taskid'],
-            $r['attemptid'],
-            $r['foldernamepattern'],
-            $r['filenamepattern'],
-            $r['sections'],
-            $r['attachments']
+            $r['attemptids'],
         );
         $this->assertSame(
             webservice_status::E_ACCESS_DENIED->name,
@@ -156,47 +141,36 @@ final class generate_attempt_report_test extends \advanced_testcase {
      * Verifies webservice parameter validation
      *
      * @dataProvider parameter_validation_data_provider
-     * @covers \archivingmod_quiz\external\generate_attempt_report::execute
-     * @covers \archivingmod_quiz\external\generate_attempt_report::validate_parameters
+     * @covers \archivingmod_quiz\external\get_attempts_metadata::execute
+     * @covers \archivingmod_quiz\external\get_attempts_metadata::validate_parameters
      *
      * @param string $invalidparameterkey Key of the parameter to invalidate
      * @return void
-     * @throws \DOMException
      * @throws \dml_exception
      * @throws \dml_transaction_exception
      * @throws \moodle_exception
      */
     public function test_parameter_validation(string $invalidparameterkey): void {
-        // Create mock quiz and activity archiving task.
+        // Create mock quiz and archive job.
         $this->resetAfterTest();
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-2';
         $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
 
         // Create a request.
-        $uuid = '20000000-0000-0000-0000-0123456789ab';
-        $r = $this->generate_valid_request($uuid, $mocks->task->get_id(), $mocks->attempts[0]->attemptid);
+        $r = $this->generate_valid_request('20000000-0000-0000-0000-0123456789ab', $mocks->task->get_id());
         $_GET['wstoken'] = $wstoken;
 
         // Execute the request.
-        if (in_array($invalidparameterkey, ['sections'])) {
-            // Empty array is actually already detected by Moodle parameter validation so we expect an exception here.
-            $this->expectException(\invalid_parameter_exception::class);
-            $this->expectExceptionMessageMatches('/.*'.$invalidparameterkey.'.*/');
-        }
-        $res = generate_attempt_report::execute(
-            $uuid,
+        $res = get_attempts_metadata::execute(
+            $r['uuid'],
             $invalidparameterkey == 'taskid' ? 0 : $r['taskid'],
-            $invalidparameterkey == 'attemptid' ? 0 : $r['attemptid'],
-            $invalidparameterkey == 'foldername pattern' ? 'invalid-${pattern' : $r['foldernamepattern'],
-            $invalidparameterkey == 'filename pattern' ? 'invalid-${pattern' : $r['filenamepattern'],
-            $invalidparameterkey == 'sections' ? [] : $r['sections'],
-            $r['attachments']
+            $invalidparameterkey == 'attemptids' ? [] : $r['attemptids'],
         );
         $this->assertNotSame(
             webservice_status::OK->name,
             $res['status'],
-            'Invalid parameter should not be accepted'
+            'Invalid parameter was falsely accepted'
         );
     }
 
@@ -208,52 +182,40 @@ final class generate_attempt_report_test extends \advanced_testcase {
     public static function parameter_validation_data_provider(): array {
         return [
             'Invalid taskid' => ['taskid'],
-            'Invalid attemptid' => ['attemptid'],
-            'Invalid foldernamepattern' => ['foldername pattern'],
-            'Invalid filenamepattern' => ['filename pattern'],
-            'Invalid sections' => ['sections'],
+            'Invalid attemptids' => ['attemptids'],
         ];
     }
 
     /**
      * Test web service part of processing of a valid request
      *
-     * @covers \archivingmod_quiz\external\generate_attempt_report::execute
+     * @covers \archivingmod_quiz\external\get_attempts_metadata::execute
      *
      * @return void
-     * @throws \DOMException
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \dml_transaction_exception
      * @throws \moodle_exception
      */
     public function test_execute(): void {
-        // Create mock quiz and activity archiving task.
+        // Create mock quiz and archive job.
         $this->resetAfterTest();
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-1';
         $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
 
         // Create a valid request.
-        $uuid = '10000000-0000-0000-0000-0123456789ab';
-        $r = $this->generate_valid_request($uuid, $mocks->task->get_id(), $mocks->attempts[0]->attemptid);
+        $r = $this->generate_valid_request('20000000-0000-0000-0000-000000000000', $mocks->task->get_id());
         $_GET['wstoken'] = $wstoken;
 
         // Execute the request.
-        $res = generate_attempt_report::execute(
+        $res = get_attempts_metadata::execute(
             $r['uuid'],
             $r['taskid'],
-            $r['attemptid'],
-            $r['foldernamepattern'],
-            $r['filenamepattern'],
-            $r['sections'],
-            $r['attachments']
+            $r['attemptids'],
         );
-        $this->assertSame(
-            webservice_status::E_ATTEMPT_NOT_FOUND->name,
-            $res['status'],
-            'Mock quiz does not contain the actual attempt so E_ATTEMPT_NOT_FOUND is expected...'
-        );
+        $this->assertSame(webservice_status::OK->name, $res['status'], 'The status should be OK.');
+        $this->assertArrayHasKey('attempts', $res, 'The response should contain an attempts key.');
     }
 
 }

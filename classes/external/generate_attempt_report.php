@@ -219,15 +219,6 @@ class generate_attempt_report extends external_api {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
-        // Acquire required data objects.
-        list($course, $cm) = get_course_and_cm_from_cmid($task->get_context()->instanceid, 'quiz');
-        if (!$course) {
-            return ['status' => webservice_status::E_COURSE_NOT_FOUND->name];
-        }
-        if (!$cm) {
-            return ['status' => webservice_status::E_CM_NOT_FOUND->name];
-        }
-
         // Validate folder and filename pattern.
         if (!storage::is_valid_filename_pattern(
             $params['foldernamepattern'],
@@ -245,8 +236,8 @@ class generate_attempt_report extends external_api {
         }
 
         // Ensure that requested attempt exists in quiz.
-        $quiz = new quiz_manager($course->id, $cm->id);
-        if (!$quiz->attempt_exists($params['attemptid'])) {
+        $quizmanager = quiz_manager::from_context($task->get_context());
+        if (!$quizmanager->attempt_exists($params['attemptid'])) {
             return ['status' => webservice_status::E_ATTEMPT_NOT_FOUND->name];
         }
 
@@ -256,7 +247,7 @@ class generate_attempt_report extends external_api {
         ]));
 
         // Generate attempt report as HTML.
-        $report = $quiz->attempt_report();
+        $report = $quizmanager->attempt_report();
         $res = [
             'attemptid' => $params['attemptid'],
             'report' => $report->generate_full_page($params['attemptid'], $params['sections']),
@@ -264,7 +255,7 @@ class generate_attempt_report extends external_api {
 
         // Check for attachments.
         if ($params['attachments']) {
-            $res['attachments'] = $quiz->get_attempt_attachments_metadata($params['attemptid']);
+            $res['attachments'] = $quizmanager->get_attempt_attachments_metadata($params['attemptid']);
 
             // TODO: Update attachment count in attempt metadata table.
             /*$numattachments = count($res['attachments']);

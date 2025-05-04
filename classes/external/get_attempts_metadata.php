@@ -28,12 +28,14 @@ namespace archivingmod_quiz\external;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+use archivingmod_quiz\quiz_manager;
 use archivingmod_quiz\type\webservice_status;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
+use local_archiving\driver\mod\activity_archiving_task;
 
 
 /**
@@ -174,8 +176,6 @@ class get_attempts_metadata extends external_api {
         int    $taskidraw,
         array  $attemptidsraw
     ): array {
-        global $DB;
-
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
             'uuid' => $uuidraw,
@@ -183,61 +183,32 @@ class get_attempts_metadata extends external_api {
             'attemptids' => $attemptidsraw,
         ]);
 
-        // TODO
-        return ['status' => webservice_status::OK->name];
+        // Validate attemptids.
+        if (empty($params['attemptids'])) {
+            return ['status' => webservice_status::E_ATTEMPT_NOT_FOUND->name];
+        }
 
-        /*
-        // Validate that the jobid exists.
+        // Find the task.
         try {
-            $job = ArchiveJob::get_by_jobid($params['jobid']);
+            $task = activity_archiving_task::get_by_id($params['taskid']);
         } catch (\dml_exception $e) {
-            return ['status' => 'E_JOB_NOT_FOUND'];
+            return ['status' => webservice_status::E_TASK_NOT_FOUND->name];
         }
 
         // Check access rights.
-        if (!$job->has_read_access(optional_param('wstoken', null, PARAM_TEXT))) {
-            return ['status' => 'E_ACCESS_DENIED'];
+        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
-        // Check capabilities.
-        try {
-            $context = \context_module::instance($params['cmid']);
-        } catch (\dml_exception $e) {
-            throw new \invalid_parameter_exception("No module context with given cmid found");
-        }
-        require_capability('mod/quiz_archiver:use_webservice', $context);
-
-        // Acquire required data objects.
-        if (!$course = $DB->get_record('course', ['id' => $params['courseid']])) {
-            throw new \invalid_parameter_exception("No course with given courseid found");
-        }
-        if (!$cm = get_coursemodule_from_id("quiz", $params['cmid'])) {
-            // @codeCoverageIgnoreStart
-            // This should be covered by the context query above but stays as a safeguard nonetheless.
-            throw new \invalid_parameter_exception("No course module with given cmid found");
-            // @codeCoverageIgnoreEnd
-        }
-        if (!$quiz = $DB->get_record('quiz', ['id' => $params['quizid']])) {
-            throw new \invalid_parameter_exception("No quiz with given quizid found");
-        }
-
-        // Extract attempt metadata.
-        $report = new Report($course, $cm, $quiz);
-        if (!$report->has_access(optional_param('wstoken', null, PARAM_TEXT))) {
-            return [
-                'status' => 'E_ACCESS_DENIED',
-            ];
-        }
-        $attemptmetadata = $report->get_attempts_metadata($params['attemptids']);
-
+        // Get quiz manager and build response.
+        $quizmanager = quiz_manager::from_context($task->get_context());
         return [
-            'courseid' => $params['courseid'],
-            'cmid' => $params['cmid'],
-            'quizid' => $params['quizid'],
-            'attempts' => $attemptmetadata,
-            'status' => 'OK',
+            'courseid' => $quizmanager->get_course()->id,
+            'cmid' => $quizmanager->get_cm()->id,
+            'quizid' => $quizmanager->get_quiz()->id,
+            'attempts' => $quizmanager->get_attempts_metadata($params['attemptids']),
+            'status' => webservice_status::OK->name,
         ];
-        */
     }
 
 }
