@@ -149,9 +149,12 @@ class update_task_status extends external_api {
         try {
             $task->set_status($newstatus);
             $task->set_progress($params['progress']);
+            // @codeCoverageIgnoreStart
         } catch (\dml_exception $e) {
+            // This should never be reached but is here as a safeguard.
             return ['status' => webservice_status::E_UPDATE_FAILED->name];
         }
+        // @codeCoverageIgnoreEnd
 
         return ['status' => webservice_status::OK->name];
     }
