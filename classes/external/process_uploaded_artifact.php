@@ -33,6 +33,9 @@ use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
+use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\storage;
+use local_archiving\type\activity_archiving_task_status;
 
 
 /**
@@ -161,95 +164,69 @@ class process_uploaded_artifact extends external_api {
             'artifact_sha256sum' => $artifactsha256sumraw,
         ]);
 
-        return ['status' => webservice_status::OK->name];
+        // Find the task.
+        try {
+            $task = activity_archiving_task::get_by_id($params['taskid']);
+        } catch (\dml_exception $e) {
+            return ['status' => webservice_status::E_TASK_NOT_FOUND->name];
+        }
 
-//        // Validate that the jobid exists and no artifact was uploaded previously.
-//        try {
-//            $job = ArchiveJob::get_by_jobid($params['jobid']);
-//            if ($job->is_complete()) {
-//                return [
-//                    'status' => 'E_NO_ARTIFACT_UPLOAD_EXPECTED',
-//                ];
-//            }
-//        } catch (\dml_exception $e) {
-//            return [
-//                'status' => 'E_JOB_NOT_FOUND',
-//            ];
-//        }
-//
-//        // Check access rights.
-//        if (!$job->has_write_access(optional_param('wstoken', null, PARAM_TEXT))) {
-//            return [
-//                'status' => 'E_ACCESS_DENIED',
-//            ];
-//        }
-//
-//        // Check capabilities.
-//        $context = \context_module::instance($job->get_cmid());
-//        require_capability('mod/quiz_archiver:use_webservice', $context);
-//
-//        // Validate uploaded file.
-//        // Note: We use SHA256 instead of Moodle sha1, since SHA1 is prone to.
-//        // hash collisions!
-//        $draftfile = FileManager::get_draft_file(
-//            $params['artifact_contextid'],
-//            $params['artifact_itemid'],
-//            $params['artifact_filepath'],
-//            $params['artifact_filename'],
-//        );
-//        if (!$draftfile) {
-//            $job->set_status(ArchiveJob::STATUS_FAILED);
-//            return [
-//                'status' => 'E_UPLOADED_ARTIFACT_NOT_FOUND',
-//            ];
-//        }
-//
-//        if ($params['artifact_sha256sum'] != FileManager::hash_file($draftfile)) {
-//            $job->set_status(ArchiveJob::STATUS_FAILED);
-//            $draftfile->delete();
-//            return [
-//                'status' => 'E_ARTIFACT_CHECKSUM_INVALID',
-//            ];
-//        }
-//
-//        // The following code is tested covered by more specific tests.
-//        // @codingStandardsIgnoreLine
-//        // @codeCoverageIgnoreStart
-//
-//        // Store uploaded file.
-//        $fm = new FileManager($job->get_courseid(), $job->get_cmid(), $job->get_quizid());
-//        try {
-//            $artifact = $fm->store_uploaded_artifact($draftfile, $job->get_id());
-//            $job->link_artifact($artifact->get_id(), $params['artifact_sha256sum']);
-//        } catch (\Exception $e) {
-//            $job->set_status(ArchiveJob::STATUS_FAILED);
-//            return [
-//                'status' => 'E_STORE_ARTIFACT_FAILED',
-//            ];
-//        }
-//
-//        // Timestamp artifact file using TSP.
-//        if ($job->tspmanager()->wants_tsp_timestamp()) {
-//            try {
-//                $job->tspmanager()->timestamp();
-//            // @codingStandardsIgnoreStart
-//            } catch (\Exception $e) {
-//                // TODO: Fail silently for now ...
-//                /*
-//                $job->set_status(ArchiveJob::STATUS_FAILED);
-//                return [
-//                    'status' => 'E_TSP_TIMESTAMP_FAILED'
-//                ];
-//                */
-//            }
-//            // @codingStandardsIgnoreEnd
-//        }
-//
-//        // Report success.
-//        $job->set_status(ArchiveJob::STATUS_FINISHED);
-//        return [
-//            'status' => 'OK',
-//        ];
+        // Check access rights.
+        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
+        }
+
+        // Do not allow uploading of artifacts for finished jobs.
+        if ($task->is_completed()) {
+            return ['status' => webservice_status::E_NO_UPLOAD_EXPECTED->name];
+        }
+
+        // Find uploaded file (draftfile).
+        $draftfile = get_file_storage()->get_file(
+            contextid: $params['artifact_contextid'],
+            component: 'user',
+            filearea: 'draft',
+            itemid: $params['artifact_itemid'],
+            filepath: $params['artifact_filepath'],
+            filename: $params['artifact_filename']
+        );
+        if (!$draftfile) {
+            $task->set_status(activity_archiving_task_status::FAILED);
+            return ['status' => webservice_status::E_FILE_NOT_FOUND->name];
+        }
+
+        // Validate uploaded file.
+        // Note: We use SHA256 instead of Moodle sha1, since SHA1 is prone to hash collisions!
+        if ($params['artifact_sha256sum'] != storage::hash_file($draftfile)) {
+            $task->set_status(activity_archiving_task_status::FAILED);
+            $draftfile->delete();
+            return ['status' => webservice_status::E_CHECKSUM_MISMATCH->name];
+        }
+
+        // @codeCoverageIgnoreStart
+        // The following code is tested covered by more specific tests.
+
+        // Store uploaded file.
+        try {
+            $task->link_artifact(
+                artifactfile: $draftfile,
+                sha256sum: $params['artifact_sha256sum'],
+                takeownership: true
+            );
+        } catch (\Exception $e) {
+            $task->set_status(activity_archiving_task_status::FAILED);
+            $draftfile->delete();
+            return [
+                'status' => webservice_status::E_STORING_FAILED->name,
+            ];
+        }
+
+        // Report success.
+        $task->set_status(activity_archiving_task_status::FINISHED);
+        return [
+            'status' => 'OK',
+        ];
+        // @codeCoverageIgnoreEnd
     }
 
 }

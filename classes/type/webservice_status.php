@@ -76,4 +76,16 @@ enum webservice_status {
     /** @var self The task or job is already completed and can not be altered */
     case E_ALREADY_COMPLETED;
 
+    /** @var self No file upload was expected */
+    case E_NO_UPLOAD_EXPECTED;
+
+    /** @var self File could not be found */
+    case E_FILE_NOT_FOUND;
+
+    /** @var self Checksum validation failed */
+    case E_CHECKSUM_MISMATCH;
+
+    /** @var self Storing a file failed */
+    case E_STORING_FAILED;
+
 }
