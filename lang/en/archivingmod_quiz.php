@@ -26,6 +26,7 @@
 
 // Common.
 $string['pluginname'] = 'Quiz';
+$string['a'] = '{$a}';
 
 // Privacy.
 $string['privacy:metadata'] = 'TODO';
@@ -129,3 +130,7 @@ $string['autoinstall_username_help'] = 'Name of the service user that is created
 $string['autoinstall_wsname'] = 'Web service name';
 $string['autoinstall_wsname_help'] = 'Name of the webservice that is created for the quiz archive worker.';
 $string['manual_configuration_continue'] = 'To manually configure all plugin settings use the "Continue" button at the bottom of this page.';
+
+// Remote archive worker.
+$string['remote_worker_enqueue_job_failed'] = 'Failed to enqueue archive job at the remote archive worker service. HTTP status code: {$a}';
+$string['remote_worker_missing_return_param'] = 'The remote archive worker service did not return the expected response. Missing parameter: {$a}';
