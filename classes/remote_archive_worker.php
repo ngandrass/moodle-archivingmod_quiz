@@ -144,8 +144,10 @@ class remote_archive_worker {
             'image_optimize_height',
             'image_optimize_quality',
             'keep_html_files',
-
-        ], attempt_report_section::values());
+        ], array_map(
+            fn($section) => "report_section_{$section->value}",
+            attempt_report_section::cases()
+        ));
 
         foreach ($expectedkeys as $key) {
             if (!isset($settings->{$key})) {
@@ -181,7 +183,8 @@ class remote_archive_worker {
                     "quality" => $settings->image_optimize_quality,
                 ] : false,
                 "fetch_metadata" => true,
-                "keep_html_files" => $settings->keep_html_files,
+                "fetch_attachments" => (bool) $settings->{'report_section_' . attempt_report_section::ATTACHMENTS->value},
+                "keep_html_files" => (bool) $settings->keep_html_files,
             ],
         ];
     }
