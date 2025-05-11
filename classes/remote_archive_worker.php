@@ -158,14 +158,14 @@ class remote_archive_worker {
         // Generate report sections from settings.
         $sections = [];
         foreach (attempt_report_section::cases() as $section) {
-            $sections[$section->value] = $settings->{$section->value};
+            $sections[$section->value] = $settings->{"report_section_{$section->value}"};
         }
 
         // Build job creation request payload.
         return [
             "api_version" => self::API_VERSION,
             "taskid" => $task->get_id(),
-            "moodle" => [
+            "moodle_api" => [
                 "wstoken" => $wstoken,
                 "base_url" => $this->moodlebaseurl,
                 "webservice_url" => $this->moodlebaseurl.'/webservice/rest/server.php',
@@ -175,9 +175,10 @@ class remote_archive_worker {
                 "attemptids" => $attemptids,
                 "report_sections" => $sections,
                 "paper_format" => $settings->paper_format,
+                "archive_filename" => "TODOCHANGEME", // TODO (MDL-0): Change this to a proper filename.
                 "foldername_pattern" => $settings->attempt_foldername_pattern,
-                "filename_pattern" => $settings->filename_pattern,
-                "image_optimization" => $settings->image_optimize ? [
+                "filename_pattern" => $settings->attempt_filename_pattern,
+                "image_optimize" => $settings->image_optimize ? [
                     "width" => $settings->image_optimize_width,
                     "height" => $settings->image_optimize_height,
                     "quality" => $settings->image_optimize_quality,
@@ -213,7 +214,7 @@ class remote_archive_worker {
         // Moodle curl wrapper automatically closes curl handle after requests. No need to call curl_close() manually.
         // Ignore URL filter since we require custom ports and the URL is only configurable by admins.
         $c = new curl(['ignoresecurity' => true]);
-        $result = $c->post($this->serverurl, $payload, [
+        $result = $c->post($this->serverurl.'/archive/archivingmod_quiz', $payload, [
             'CURLOPT_CONNECTTIMEOUT' => $this->connectiontimeoutsec,
             'CURLOPT_TIMEOUT' => $this->requesttimeoutsec,
             'CURLOPT_HTTPHEADER' => [
@@ -233,7 +234,7 @@ class remote_archive_worker {
             throw new \moodle_exception('a', 'archivingmod_quiz', $data->error);
         }
         foreach (['jobid', 'status'] as $key) {
-            if (!isset($data[$key])) {
+            if (!isset($data->{$key})) {
                 throw new \moodle_exception('remote_worker_missing_return_param', 'archivingmod_quiz', $key);
             }
         }
@@ -241,7 +242,7 @@ class remote_archive_worker {
         // Decoded JSON data containing jobid and job_status returned on success.
         return (object) [
             'uuid' => $data->jobid,
-            'status' => activity_archiving_task_status::from($data->status),
+            'status' => activity_archiving_task_status::from((int) $data->status),
         ];
     }
 
