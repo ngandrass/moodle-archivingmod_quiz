@@ -109,35 +109,44 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
             }
 
             if ($status == activity_archiving_task_status::CREATED) {
+                $quizmanager = quiz_manager::from_context($task->get_context());
+                $wstoken = $task->create_webservice_token(
+                    webserviceid: get_config('archivingmod_quiz', 'webservice_id'),
+                    userid: get_config('archivingmod_quiz', 'webservice_userid'),
+                    lifetimesec: get_config('local_archiving', 'job_timeout_min') * MINSECS
+                );
+
+                $worker = remote_archive_worker::instance();
+                $worker->enqueue_archive_job(
+                    wstoken: $wstoken,
+                    task: $task,
+                    attemptids: array_keys($quizmanager->get_attempts())
+                );
+
+                // TODO: Error handling
                 $status = activity_archiving_task_status::AWAITING_PROCESSING;
                 throw new yield_exception();
             }
 
             if ($status == activity_archiving_task_status::AWAITING_PROCESSING) {
-                $status = activity_archiving_task_status::RUNNING;
-                $task->set_progress(0);
+                // TODO: Check for timeout. Probably on job level?
+
+                // Task status is updated by the worker.
                 throw new yield_exception();
             }
 
             if ($status == activity_archiving_task_status::RUNNING) {
-                if ($task->get_progress() < 50) {
-                    $task->set_progress(50);
-                    throw new yield_exception();
-                } else if ($task->get_progress() < 100) {
-                    $task->set_progress(100);
-                    throw new yield_exception();
-                } else {
-                    $status = activity_archiving_task_status::FINALIZING;
-                }
+                // TODO: Check for timeout. Probably on job level?
+
+                // Task status is updated by the worker.
+                throw new yield_exception();
             }
 
             if ($status == activity_archiving_task_status::FINALIZING) {
-                // FIXME: Replace dummy artifact file.
-                $fs = get_file_storage();
-                $artifact = $fs->create_file_from_string($task->generate_artifact_fileinfo('foo.txt'), 'hello world');
-                $task->link_artifact($artifact);
+                // TODO: Check for timeout. Probably on job level?
 
-                $status = activity_archiving_task_status::FINISHED;
+                // Task is finalized by process_uploaded_artifact webservice function.
+                throw new yield_exception();
             }
         } finally {
             $task->set_status($status);
