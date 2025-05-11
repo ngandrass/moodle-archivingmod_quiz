@@ -251,10 +251,19 @@ class generate_attempt_report extends external_api {
         ]));
 
         // Generate attempt report as HTML.
+        $sections = [];
+        foreach ($params['sections'] as $section => $enabled) {
+            if ($enabled) {
+                if (!$sectiontype = attempt_report_section::tryFrom($section)) {
+                    return ['status' => webservice_status::E_INVALID_PARAM->name];
+                }
+                $sections[] = $sectiontype;
+            }
+        }
         $report = $quizmanager->attempt_report();
         $res = [
             'attemptid' => $params['attemptid'],
-            'report' => $report->generate_full_page($params['attemptid'], $params['sections']),
+            'report' => $report->generate_full_page($params['attemptid'], $sections),
         ];
 
         // Check for attachments.
