@@ -148,7 +148,10 @@ class update_task_status extends external_api {
         // Update status.
         try {
             $task->set_status($newstatus);
-            $task->set_progress($params['progress']);
+
+            if ($params['progress'] !== null) {
+                $task->set_progress($params['progress']);
+            }
             // @codeCoverageIgnoreStart
         } catch (\dml_exception $e) {
             // This should never be reached but is here as a safeguard.
