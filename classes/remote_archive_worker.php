@@ -17,7 +17,7 @@
 /**
  * This file defines the remote_archive_worker class.
  *
- * @package   quiz_archiver
+ * @package   archivingmod_quiz
  * @copyright 2025 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,6 +25,7 @@
 namespace archivingmod_quiz;
 
 use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\type\worker_status;
 use curl;
 use local_archiving\driver\mod\activity_archiving_task;
 use local_archiving\type\activity_archiving_task_status;
@@ -55,6 +56,62 @@ class remote_archive_worker {
         protected int    $connectiontimeoutsec = 5,
         protected int    $requesttimeoutsec = 20,
     ) {
+        $this->serverurl = rtrim($this->serverurl, '/');
+        $this->moodlebaseurl = rtrim($this->moodlebaseurl, '/');
+    }
+
+    /**
+     * Creates a new instance of the remote archive worker with default values
+     *
+     * @return remote_archive_worker New instance of the remote archive worker
+     * @throws \dml_exception
+     */
+    public static function instance(): remote_archive_worker {
+        global $CFG;
+
+        return new self(
+            get_config('archivingmod_quiz', 'worker_url'),
+            get_config('archivingmod_quiz', 'internal_wwwroot') ?: $CFG->wwwroot
+        );
+    }
+
+    /**
+     * Queries the worker service for its current status
+     *
+     * @return \stdClass Object containing 'status' and 'queue_len' properties
+     * @throws \moodle_exception If the request failed or the response was invalid
+     */
+    public function get_status(): \stdClass {
+        // Execute request.
+        // Moodle curl wrapper automatically closes curl handle after requests. No need to call curl_close() manually.
+        // Ignore URL filter since we require custom ports and the URL is only configurable by admins.
+        $c = new curl(['ignoresecurity' => true]);
+        $result = $c->get($this->serverurl.'/status', [], [
+            'CURLOPT_CONNECTTIMEOUT' => $this->connectiontimeoutsec,
+            'CURLOPT_TIMEOUT' => $this->requesttimeoutsec,
+        ]);
+
+        $httpstatus = $c->get_info()['http_code'];  // Invalid PHPDoc in Moodle curl wrapper. Array returned instead of string.
+        $data = json_decode($result);
+
+        // Handle errors.
+        if ($data === null) {
+            throw new \moodle_exception('remote_worker_get_status_failed', 'archivingmod_quiz', $httpstatus);
+        }
+        if ($httpstatus != 200) {
+            throw new \moodle_exception('a', 'archivingmod_quiz', $data->error);
+        }
+        foreach (['status', 'queue_len'] as $key) {
+            if (!isset($data[$key])) {
+                throw new \moodle_exception('remote_worker_missing_return_param', 'archivingmod_quiz', $key);
+            }
+        }
+
+        // Return response.
+        return (object) [
+            'status' => worker_status::from($data->status),
+            'queue_len' => (int) $data->queue_len,
+        ];
     }
 
     /**
