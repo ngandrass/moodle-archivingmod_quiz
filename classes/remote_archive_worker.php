@@ -228,14 +228,14 @@ class remote_archive_worker {
 
         // Handle errors.
         if ($data === null) {
-            throw new \moodle_exception('remote_worker_enqueue_job_failed', 'archivingmod_quiz', $httpstatus);
+            throw new \moodle_exception('remote_worker_enqueue_job_failed', 'archivingmod_quiz', a: $httpstatus);
         }
         if ($httpstatus != 200) {
-            throw new \moodle_exception('a', 'archivingmod_quiz', $data->error);
+            throw new \moodle_exception('a', 'archivingmod_quiz', a: $data->error);
         }
         foreach (['jobid', 'status'] as $key) {
             if (!isset($data->{$key})) {
-                throw new \moodle_exception('remote_worker_missing_return_param', 'archivingmod_quiz', $key);
+                throw new \moodle_exception('remote_worker_missing_return_param', 'archivingmod_quiz', a: $key);
             }
         }
 
