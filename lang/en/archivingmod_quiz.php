@@ -132,5 +132,6 @@ $string['autoinstall_wsname_help'] = 'Name of the webservice that is created for
 $string['manual_configuration_continue'] = 'To manually configure all plugin settings use the "Continue" button at the bottom of this page.';
 
 // Remote archive worker.
-$string['remote_worker_enqueue_job_failed'] = 'Failed to enqueue archive job at the remote archive worker service. HTTP status code: {$a}';
+$string['remote_worker_enqueue_job_failed'] = 'Failed to enqueue archive job at the remote archive worker service.';
+$string['remote_worker_enqueue_job_failed_a'] = 'Failed to enqueue archive job at the remote archive worker service: {$a}';
 $string['remote_worker_missing_return_param'] = 'The remote archive worker service did not return the expected response. Missing parameter: {$a}';

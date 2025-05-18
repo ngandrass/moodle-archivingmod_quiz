@@ -117,11 +117,12 @@ class archivingmod extends \local_archiving\driver\mod\archivingmod {
                 );
 
                 $worker = remote_archive_worker::instance();
-                $worker->enqueue_archive_job(
+                $workerjob = $worker->enqueue_archive_job(
                     wstoken: $wstoken,
                     task: $task,
                     attemptids: array_keys($quizmanager->get_attempts())
                 );
+                $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
 
                 // TODO: Error handling
                 $status = activity_archiving_task_status::AWAITING_PROCESSING;

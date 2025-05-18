@@ -223,12 +223,16 @@ class remote_archive_worker {
             ],
         ]);
 
-        $httpstatus = $c->get_info()['http_code'];  // Invalid PHPDoc in Moodle curl wrapper. Array returned instead of string.
+        $httpstatus = $c->get_info()['http_code'];
         $data = json_decode($result);
 
         // Handle errors.
         if ($data === null) {
-            throw new \moodle_exception('remote_worker_enqueue_job_failed', 'archivingmod_quiz', a: $httpstatus);
+            throw new \moodle_exception(
+                'remote_worker_enqueue_job_failed_a',
+                'archivingmod_quiz',
+                a: curl_strerror($c->get_errno())
+            );
         }
         if ($httpstatus != 200) {
             throw new \moodle_exception('a', 'archivingmod_quiz', a: $data->error);

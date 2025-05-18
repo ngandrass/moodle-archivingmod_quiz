@@ -294,7 +294,7 @@ class generate_attempt_report extends external_api {
         );
 
         // Log and return response.
-        $task->get_logger()->debug("Generated attempt report for attempt {$params['attemptid']}");
+        $task->get_logger()->debug("Generated report for attempt {$params['attemptid']}");
         $res['status'] = webservice_status::OK->name;
 
         return $res;
