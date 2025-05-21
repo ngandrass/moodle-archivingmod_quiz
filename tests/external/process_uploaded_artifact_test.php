@@ -26,10 +26,9 @@ namespace archivingmod_quiz\external;
 
 
 use archivingmod_quiz\type\webservice_status;
-use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\activity_archiving_task;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\filearea;
-use tool_uploaduser\process;
 
 /**
  * Tests for the process_uploaded_artifact external service

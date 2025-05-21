@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -25,7 +24,7 @@
 
 namespace archivingmod_quiz;
 
-use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\activity_archiving_task;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\activity_archiving_task_status;
 
@@ -36,7 +35,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Quiz activity archiving driver
  */
-class archivingmod extends \local_archiving\driver\mod\archivingmod {
+class archivingmod extends \local_archiving\driver\archivingmod {
 
     /** @var \stdClass Course the quiz lives in */
     protected \stdClass $course;

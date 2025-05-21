@@ -14,13 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
-// @codingStandardsIgnoreLine
+use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
-use local_archiving\driver\mod\activity_archiving_task;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
 
+// @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 global $CFG; // @codeCoverageIgnore
