@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 global $DB;
 
 if ($hassiteconfig) {
-    $settings = new admin_settingpage('archivingmod_quiz_settings', new lang_string('pluginname', 'archivingmod_quiz'));
+    $settings = new admin_settingpage('archivingmod_quiz', new lang_string('pluginname', 'archivingmod_quiz'));
 
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
@@ -43,6 +43,13 @@ if ($hassiteconfig) {
         $settings->add(new admin_setting_heading('archivingmod_quiz/header_docs',
             null,
             get_string('setting_header_docs_desc', 'archivingmod_quiz')
+        ));
+
+        // Enabled.
+        $settings->add(new admin_setting_configcheckbox('archivingmod_quiz/enabled',
+            get_string('setting_enabled', 'archivingmod_quiz'),
+            get_string('setting_enabled_desc', 'archivingmod_quiz'),
+            '1'
         ));
 
         // Autoinstall.

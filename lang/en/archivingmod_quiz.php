@@ -101,6 +101,8 @@ $string['error_invalid_attempt_foldername_pattern'] = 'Invalid attempt report fo
 
 // Admin settings.
 $string['setting_autoconfigure'] = 'Automatic configuration';
+$string['setting_enabled'] = 'Enabled';
+$string['setting_enabled_desc'] = 'Enables or disables this activity archiving driver. If disabled, no activities can be archived using this driver.';
 $string['setting_header_docs_desc'] = 'This plugin archives quiz attempts as PDF and HTML files. It <b>requires a separate <a href="https://quizarchiver.gandrass.de/installation/archiveworker/" target="_blank">worker service</a></b> to be installed for the actual archiving process to work. Please refer to the <a href="https://quizarchiver.gandrass.de/" target="_blank">documentation</a> for more details and setup instructions.';
 $string['setting_header_archive_worker'] = 'Archive Worker Service';
 $string['setting_header_archive_worker_desc'] = 'Configuration of the archive worker service and the Moodle web service it uses.';
