@@ -50,7 +50,7 @@ $title = get_string('autoinstall_plugin', 'archivingmod_quiz');
 $PAGE->set_title($title);
 
 $returnlink = html_writer::link(
-    new moodle_url('/admin/settings.php', ['section' => 'archivingmod_quiz_settings']),
+    new moodle_url('/admin/settings.php', ['section' => 'archivingmod_quiz']),
     get_string('back')
 );
 

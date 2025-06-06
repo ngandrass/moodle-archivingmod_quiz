@@ -143,12 +143,12 @@ class autoinstall {
 
             // Apply default values for all plugin settings.
             $adminroot = admin_get_root();
-            $adminsearch = $adminroot->search('archivingmod_quiz_settings');
-            if (!$adminsearch || !$adminsearch['archivingmod_quiz_settings']->page) {
+            $adminsearch = $adminroot->search('archivingmod_quiz');
+            if (!$adminsearch || !$adminsearch['archivingmod_quiz']->page) {
                 $log[] = "Error: Could not find admin settings definitions for archivingmod_quiz plugin.";
                 throw new \RuntimeException();
             }
-            $adminpage = $adminsearch['archivingmod_quiz_settings']->page;
+            $adminpage = $adminsearch['archivingmod_quiz']->page;
             $appliedsettings = admin_apply_default_settings($adminpage);
             if (count($appliedsettings) < 1) {
                 $log[] = "Error: Could not apply default settings for archivingmod_quiz plugin.";
