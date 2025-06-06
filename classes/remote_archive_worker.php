@@ -228,11 +228,12 @@ class remote_archive_worker {
 
         // Handle errors.
         if ($data === null) {
-            throw new \moodle_exception(
-                'remote_worker_enqueue_job_failed_a',
-                'archivingmod_quiz',
-                a: curl_strerror($c->get_errno())
-            );
+            if ($httpstatus) {
+                $details = "HTTP " . $httpstatus;
+            } else {
+                $details = curl_strerror($c->get_errno());
+            }
+            throw new \moodle_exception('remote_worker_enqueue_job_failed_a', 'archivingmod_quiz', a: $details);
         }
         if ($httpstatus != 200) {
             throw new \moodle_exception('a', 'archivingmod_quiz', a: $data->error);
