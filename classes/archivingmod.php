@@ -62,6 +62,22 @@ class archivingmod extends \local_archiving\driver\archivingmod {
     }
 
     #[\Override]
+    public static function is_ready(): bool {
+        $config = get_config('archivingmod_quiz');
+
+        if (
+            intval($config->webservice_id ?? 0) <= 0 ||
+            intval($config->webservice_userid ?? 0) <= 0 ||
+            strlen($config->worker_url ?? '') < 1
+        ) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+    #[\Override]
     public static function get_supported_activities(): array {
         return ['quiz'];
     }
