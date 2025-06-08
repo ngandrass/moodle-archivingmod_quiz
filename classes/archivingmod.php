@@ -106,7 +106,8 @@ class archivingmod extends \local_archiving\driver\archivingmod {
 
     #[\Override]
     public function execute_task(activity_archiving_task $task): void {
-        $status = $task->get_status();
+        $originstatus = $task->get_status();
+        $status = $originstatus;
 
         try {
             if ($status == activity_archiving_task_status::UNINITIALIZED) {
@@ -155,7 +156,10 @@ class archivingmod extends \local_archiving\driver\archivingmod {
                 throw new yield_exception();
             }
         } finally {
-            $task->set_status($status);
+            // Update task status if it has changed.
+            if ($status != $originstatus) {
+                $task->set_status($status);
+            }
         }
     }
 
