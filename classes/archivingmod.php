@@ -106,59 +106,50 @@ class archivingmod extends \local_archiving\driver\archivingmod {
 
     #[\Override]
     public function execute_task(activity_archiving_task $task): void {
-        try {
-            if ($task->get_status(usecached: true) == activity_archiving_task_status::UNINITIALIZED) {
-                $task->set_status(activity_archiving_task_status::CREATED);
-            }
+        if ($task->get_status(usecached: true) == activity_archiving_task_status::UNINITIALIZED) {
+            $task->set_status(activity_archiving_task_status::CREATED);
+        }
 
-            if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
-                $quizmanager = quiz_manager::from_context($task->get_context());
-                $wstoken = $task->create_webservice_token(
-                    webserviceid: get_config('archivingmod_quiz', 'webservice_id'),
-                    userid: get_config('archivingmod_quiz', 'webservice_userid'),
-                    lifetimesec: get_config('local_archiving', 'job_timeout_min') * MINSECS
-                );
+        if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
+            $quizmanager = quiz_manager::from_context($task->get_context());
+            $wstoken = $task->create_webservice_token(
+                webserviceid: get_config('archivingmod_quiz', 'webservice_id'),
+                userid: get_config('archivingmod_quiz', 'webservice_userid'),
+                lifetimesec: get_config('local_archiving', 'job_timeout_min') * MINSECS
+            );
 
-                $worker = remote_archive_worker::instance();
-                $workerjob = $worker->enqueue_archive_job(
-                    wstoken: $wstoken,
-                    task: $task,
-                    attemptids: array_keys($quizmanager->get_attempts())
-                );
-                $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
+            $worker = remote_archive_worker::instance();
+            $workerjob = $worker->enqueue_archive_job(
+                wstoken: $wstoken,
+                task: $task,
+                attemptids: array_keys($quizmanager->get_attempts())
+            );
+            $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
 
-                // TODO: Error handling
-                $task->set_status(activity_archiving_task_status::AWAITING_PROCESSING);
-                throw new yield_exception();
-            }
+            // TODO: Error handling
+            $task->set_status(activity_archiving_task_status::AWAITING_PROCESSING);
+            throw new yield_exception();
+        }
 
-            if ($task->get_status(usecached: true) == activity_archiving_task_status::AWAITING_PROCESSING) {
-                // TODO: Check for timeout. Probably on job level?
+        if ($task->get_status(usecached: true) == activity_archiving_task_status::AWAITING_PROCESSING) {
+            // TODO: Check for timeout. Probably on job level?
 
-                // Task status is updated by the worker.
-                throw new yield_exception();
-            }
+            // Task status is updated by the worker.
+            throw new yield_exception();
+        }
 
-            if ($task->get_status(usecached: true) == activity_archiving_task_status::RUNNING) {
-                // TODO: Check for timeout. Probably on job level?
+        if ($task->get_status(usecached: true) == activity_archiving_task_status::RUNNING) {
+            // TODO: Check for timeout. Probably on job level?
 
-                // Task status is updated by the worker.
-                throw new yield_exception();
-            }
+            // Task status is updated by the worker.
+            throw new yield_exception();
+        }
 
-            if ($task->get_status(usecached: true) == activity_archiving_task_status::FINALIZING) {
-                // TODO: Check for timeout. Probably on job level?
+        if ($task->get_status(usecached: true) == activity_archiving_task_status::FINALIZING) {
+            // TODO: Check for timeout. Probably on job level?
 
-                // Task is finalized by process_uploaded_artifact webservice function.
-                throw new yield_exception();
-            }
-        } catch (\Exception $e) {
-            // Catch the yield silently and let everything else bubble up.
-            if (!$e instanceof yield_exception) {
-                $task->set_status(activity_archiving_task_status::FAILED);
-                $task->get_logger()->error($e->getMessage());
-                throw $e;
-            }
+            // Task is finalized by process_uploaded_artifact webservice function.
+            throw new yield_exception();
         }
     }
 
