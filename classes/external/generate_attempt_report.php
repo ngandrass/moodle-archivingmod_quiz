@@ -269,14 +269,6 @@ class generate_attempt_report extends external_api {
         // Check for attachments.
         if ($params['attachments']) {
             $res['attachments'] = $quizmanager->get_attempt_attachments_metadata($params['attemptid']);
-
-            // TODO: Update attachment count in attempt metadata table.
-            /*$numattachments = count($res['attachments']);
-            $DB->set_field(ArchiveJob::ATTEMPTS_TABLE_NAME, 'numattachments', $numattachments, [
-                'jobid' => $job->get_id(),
-                'attemptid' => $params['attemptid'],
-            ]);
-            */
         } else {
             $res['attachments'] = [];
         }

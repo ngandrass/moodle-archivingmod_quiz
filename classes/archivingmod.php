@@ -111,18 +111,33 @@ class archivingmod extends \local_archiving\driver\archivingmod {
         }
 
         if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
+            // Prepare access to quiz and webservice.
             $quizmanager = quiz_manager::from_context($task->get_context());
+            $attempts = $quizmanager->get_attempts();
             $wstoken = $task->create_webservice_token(
                 webserviceid: get_config('archivingmod_quiz', 'webservice_id'),
                 userid: get_config('archivingmod_quiz', 'webservice_userid'),
                 lifetimesec: get_config('local_archiving', 'job_timeout_min') * MINSECS
             );
 
+            // Calculate and persist metadata.
+            $numattachments = 0;
+            $task->get_logger()->trace('Counting number of attachments in all attempts ...');
+            foreach ($attempts as $attempt) {
+                $numattachments += count($quizmanager::get_attempt_attachments($attempt->attemptid));
+            }
+            $task->get_logger()->trace("Found {$numattachments} attachments in all attempts.");
+
+            $job = $task->get_job();
+            $job->set_metadata_entry('num_attempts', count($attempts));
+            $job->set_metadata_entry('num_attachments', $numattachments);
+
+            // Enqueue a new job at the worker.
             $worker = remote_archive_worker::instance();
             $workerjob = $worker->enqueue_archive_job(
                 wstoken: $wstoken,
                 task: $task,
-                attemptids: array_keys($quizmanager->get_attempts())
+                attemptids: array_keys($attempts)
             );
             $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
 
