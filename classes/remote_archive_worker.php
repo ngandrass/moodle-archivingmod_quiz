@@ -126,6 +126,8 @@ class remote_archive_worker {
      *
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
      */
     protected function generate_job_payload_from_task(string $wstoken, activity_archiving_task $task, array $attemptids): array {
         // Check attemptids.
@@ -175,7 +177,7 @@ class remote_archive_worker {
                 "attemptids" => $attemptids,
                 "report_sections" => $sections,
                 "paper_format" => $settings->paper_format,
-                "archive_filename" => "TODOCHANGEME", // TODO (MDL-0): Change this to a proper filename.
+                "archive_filename" => $task->get_job()->generate_archive_name_prefix(),
                 "foldername_pattern" => $settings->attempt_foldername_pattern,
                 "filename_pattern" => $settings->attempt_filename_pattern,
                 "image_optimize" => $settings->image_optimize ? [
