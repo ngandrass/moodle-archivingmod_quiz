@@ -27,6 +27,7 @@ namespace archivingmod_quiz;
 use local_archiving\activity_archiving_task;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\task_content_metadata;
 
 // @codingStandardsIgnoreFile
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -166,6 +167,24 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             // Task is finalized by process_uploaded_artifact webservice function.
             throw new yield_exception();
         }
+    }
+
+    #[\Override]
+    public function get_task_content_metadata(activity_archiving_task $task): array {
+        $quizmanager = quiz_manager::from_context($task->get_context());
+
+        $res = [];
+        foreach ($quizmanager->get_attempts() as $attempt) {
+            $res[] = new task_content_metadata(
+                taskid: $task->get_id(),
+                userid: $attempt->userid,
+                reftable: 'quiz_attempts',
+                refid: $attempt->attemptid,
+                summary: null
+            );
+        }
+
+        return $res;
     }
 
 }
