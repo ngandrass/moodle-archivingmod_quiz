@@ -40,6 +40,8 @@ use webservice;
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class autoinstall {
+    // TODO (MDL-0): Switch to pre-defined web service via db/services.php and
+    // thereby remove creation of web service and function assignment from autoinstall.
 
     /** @var string Default name for the webservice to create */
     const DEFAULT_WSNAME = 'archivingmod_quiz_webservice';
