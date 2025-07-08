@@ -27,6 +27,9 @@ namespace archivingmod_quiz;
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+// Required for legacy mod_quiz functions ...
+require_once("$CFG->dirroot/mod/quiz/locallib.php");  // @codeCoverageIgnore
+
 
 /**
  * Quiz management class
