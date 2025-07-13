@@ -19,7 +19,7 @@ use local_archiving\archive_job;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 global $CFG; // @codeCoverageIgnore
@@ -229,7 +229,7 @@ class archivingmod_quiz_generator extends \testing_data_generator {
             // Moodle 5.0 will throw warnings for import destinations of question
             // banks. We can safely ignore this and only fail on errors.
             if (array_key_exists('errors', $precheck)) {
-                print_r($precheck); // @codingStandardsIgnoreLine
+                print_r($precheck); // phpcs:ignore
                 throw new \restore_controller_exception('Backup restore precheck failed');
             }
             // @codeCoverageIgnoreEnd

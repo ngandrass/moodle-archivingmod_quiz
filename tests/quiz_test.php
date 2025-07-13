@@ -25,7 +25,7 @@
 namespace archivingmod_quiz;
 
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 global $CFG;
 
 require_once($CFG->dirroot . '/mod/quiz/report/archiver/patch_401_class_renames.php');
@@ -41,7 +41,7 @@ final class quiz_test extends \advanced_testcase {
      *
      * @return \archivingmod_quiz_generator The data generator for the archivingmod_quiz plugin
      */
-    // @codingStandardsIgnoreLine
+    // phpcs:ignore
     public static function getDataGenerator(): \archivingmod_quiz_generator {
         return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
     }

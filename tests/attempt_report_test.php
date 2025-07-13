@@ -24,7 +24,7 @@
 
 namespace archivingmod_quiz;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 global $CFG;
 
 use archivingmod_quiz\type\attempt_filename_variable;
@@ -43,7 +43,7 @@ final class attempt_report_test extends \advanced_testcase {
      *
      * @return \archivingmod_quiz_generator The data generator for the archivingmod_quiz plugin
      */
-    // @codingStandardsIgnoreLine
+    // phpcs:ignore
     public static function getDataGenerator(): \archivingmod_quiz_generator {
         return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
     }

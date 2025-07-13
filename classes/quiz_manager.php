@@ -24,7 +24,7 @@
 
 namespace archivingmod_quiz;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 // Required for legacy mod_quiz functions ...

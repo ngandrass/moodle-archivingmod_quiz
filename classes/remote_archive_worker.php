@@ -30,7 +30,7 @@ use curl;
 use local_archiving\activity_archiving_task;
 use local_archiving\type\activity_archiving_task_status;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

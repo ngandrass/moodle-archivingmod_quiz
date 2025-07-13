@@ -38,7 +38,7 @@ final class update_task_status_test extends \advanced_testcase {
      *
      * @return \archivingmod_quiz_generator The data generator for the archivingmod_quiz plugin
      */
-    // @codingStandardsIgnoreLine
+    // phpcs:ignore
     public static function getDataGenerator(): \archivingmod_quiz_generator {
         return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
     }

@@ -24,7 +24,7 @@
 
 namespace archivingmod_quiz\external;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -242,7 +242,7 @@ class generate_attempt_report extends external_api {
         }
 
         // The following code is tested covered by more specific tests.
-        // @codingStandardsIgnoreLine
+        // phpcs:ignore
         // @codeCoverageIgnoreStart
 
         // Forcefully set URL in $PAGE to the webservice handler to prevent future warnings.
@@ -290,7 +290,7 @@ class generate_attempt_report extends external_api {
         $res['status'] = webservice_status::OK->name;
 
         return $res;
-        // @codingStandardsIgnoreLine
+        // phpcs:ignore
         // @codeCoverageIgnoreEnd
     }
 

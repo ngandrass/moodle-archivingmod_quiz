@@ -32,7 +32,7 @@ use local_archiving\type\image_type;
 use local_archiving\util\course_util;
 use mod_quiz\quiz_attempt;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 // Required for legacy mod_quiz functions ...
