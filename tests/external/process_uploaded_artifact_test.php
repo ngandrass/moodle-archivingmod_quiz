@@ -369,7 +369,6 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         $this->resetAfterTest();
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
 
-
         // Execute test call.
         $r = $this->generate_valid_request('42000000-0000-0000-0000-000000000000', $mocks->task);
         $_GET['wstoken'] = 'TEST-WS-TOKEN';

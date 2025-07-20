@@ -64,14 +64,18 @@ class attempt_report {
     /**
      * Creates a new attempt report renderer
      *
-     * @param \stdClass $course Course this renderer is associated with
-     * @param $cm \cm_info Course module this renderer is associated with
+     * @param \stdClass $course Course this attempt renderer is associated with
+     * @param \cm_info $cm Course module this renderer is associated with
+     * @param \stdClass $quiz Quiz this attempt renderer is associated with
      * @throws \dml_exception If no valid quiz can be found for the given course module
      * @throws \moodle_exception If the given course module is not a quiz
      */
     public function __construct(
+        /** @var \stdClass Course this attempt renderer is associated with */
         protected \stdClass $course,
+        /** @var \cm_info Course module this attempt renderer is associated with */
         protected \cm_info $cm,
+        /** @var \stdClass Quiz this attempt renderer is associated with */
         protected \stdClass $quiz
     ) {
         // Check cm.

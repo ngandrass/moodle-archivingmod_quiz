@@ -51,10 +51,14 @@ class remote_archive_worker {
      * @param int $requesttimeoutsec Seconds to wait for the request to complete before aborting
      */
     public function __construct(
+        /** @var string URL of the remote archive worker instance */
         protected string $serverurl,
+        /** @var string Base URL of the Moodle instance the archive worker should call back to */
         protected string $moodlebaseurl,
-        protected int    $connectiontimeoutsec = 5,
-        protected int    $requesttimeoutsec = 20,
+        /** @var int Seconds to wait until a connection can be established before aborting */
+        protected int $connectiontimeoutsec = 5,
+        /** @var int Seconds to wait for the request to complete before aborting */
+        protected int $requesttimeoutsec = 20,
     ) {
         $this->serverurl = rtrim($this->serverurl, '/');
         $this->moodlebaseurl = rtrim($this->moodlebaseurl, '/');

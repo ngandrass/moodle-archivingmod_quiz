@@ -57,7 +57,9 @@ class quiz_manager {
      * @throws \moodle_exception If the given arguments are invalid
      */
     public function __construct(
+        /** @var int ID of the course the quiz lives in */
         protected int $courseid,
+        /** @var int ID of the course module the quiz lives in */
         protected int $cmid
     ) {
         global $DB;

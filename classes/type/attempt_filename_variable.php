@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// phpcs:disable moodle.Commenting.InlineComment.DocBlock
+
 /**
  * Valid variables for attempt filename patterns
  *
- * @package     local_archiving
+ * @package     archivingmod_quiz
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
