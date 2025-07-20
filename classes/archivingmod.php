@@ -47,7 +47,6 @@ class archivingmod extends \local_archiving\driver\archivingmod {
     /** @var int ID of the targeted quiz */
     protected int $quizid;
 
-    #[\Override]
     public function __construct(\context_module $context) {
         parent::__construct($context);
 
