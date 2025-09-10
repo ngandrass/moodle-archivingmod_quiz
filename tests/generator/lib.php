@@ -115,7 +115,13 @@ class archivingmod_quiz_generator extends \testing_data_generator {
         // Create mocks.
         $mocks = self::create_mock_quiz();
         $job = archive_job::create($mocks->context, get_admin()->id, settings: (object) []);
-        $task = activity_archiving_task::create($job->get_id(), $mocks->context, get_admin()->id, 'quiz');
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $mocks->context,
+            \local_archiving\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'quiz'
+        );
 
         // Assign wstoken if given.
         if ($wstoken !== null) {
