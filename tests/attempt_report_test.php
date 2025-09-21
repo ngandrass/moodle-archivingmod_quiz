@@ -30,7 +30,6 @@ global $CFG;
 use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 
-require_once($CFG->dirroot . '/mod/quiz/report/archiver/patch_401_class_renames.php');
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
 /**

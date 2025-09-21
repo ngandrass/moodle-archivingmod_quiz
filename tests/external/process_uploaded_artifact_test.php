@@ -24,7 +24,6 @@
 
 namespace archivingmod_quiz\external;
 
-
 use archivingmod_quiz\type\webservice_status;
 use local_archiving\activity_archiving_task;
 use local_archiving\type\activity_archiving_task_status;

@@ -28,7 +28,6 @@ namespace archivingmod_quiz;
 // phpcs:ignore
 global $CFG;
 
-require_once($CFG->dirroot . '/mod/quiz/report/archiver/patch_401_class_renames.php');
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
 /**
