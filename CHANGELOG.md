@@ -6,6 +6,7 @@
 - Adapt test data generator to new archiving trigger API
 - Add Moodle plugin CI for all supported Moodle versions
 - Fix import of legacy compatibility layers in unit tests
+- Add missing language strings
 
 
 ## Version 0.1.0 (2025081900)

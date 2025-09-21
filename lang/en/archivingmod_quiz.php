@@ -27,6 +27,7 @@
 // Common.
 $string['pluginname'] = 'Quiz';
 $string['a'] = '{$a}';
+$string['archived'] = 'Archived';
 
 // Privacy.
 $string['privacy:metadata'] = 'TODO';

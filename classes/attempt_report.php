@@ -257,7 +257,7 @@ class attempt_report {
 
             // Add export date.
             $quizheaderdata['exportdate'] = [
-                'title' => get_string('archived', 'quiz_archiver'),
+                'title' => get_string('archived', 'archivingmod_quiz'),
                 'content' => userdate(time()),
             ];
 
@@ -420,7 +420,7 @@ class attempt_report {
         $imgsrc = preg_replace('/^([^\?\&\#]+).*$/', '${1}', $img->getAttribute('src'));
 
         // Convert relative URLs to absolute URLs.
-        $config = get_config('quiz_archiver');
+        $config = get_config('archivingmod_quiz');
         $moodlebaseurl = rtrim($config->internal_wwwroot ?: $CFG->wwwroot, '/').'/';
         if ($config->internal_wwwroot) {
             $imgsrc = str_replace(rtrim($CFG->wwwroot, '/'), rtrim($config->internal_wwwroot, '/'), $imgsrc);
