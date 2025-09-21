@@ -114,7 +114,7 @@ class archivingmod_quiz_generator extends \testing_data_generator {
 
         // Create mocks.
         $mocks = self::create_mock_quiz();
-        $job = archive_job::create($mocks->context, get_admin()->id, settings: (object) []);
+        $job = archive_job::create($mocks->context, get_admin()->id, 'manual', settings: (object) []);
         $task = activity_archiving_task::create(
             $job->get_id(),
             $mocks->context,
