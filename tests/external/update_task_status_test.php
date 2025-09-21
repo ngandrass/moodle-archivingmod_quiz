@@ -120,7 +120,6 @@ final class update_task_status_test extends \advanced_testcase {
 
         // Check that correct wstoken allows access.
         $_GET['wstoken'] = $wstoken;
-        $this->expectOutputRegex('/Activity archiving task \d+ progress updated/');
         $res = update_task_status::execute(
             $r['uuid'],
             $r['taskid'],

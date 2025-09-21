@@ -7,6 +7,7 @@
 - Add Moodle plugin CI for all supported Moodle versions
 - Fix import of legacy compatibility layers in unit tests
 - Add missing language strings
+- Fix unit test for archive task status update web service function
 
 
 ## Version 0.1.0 (2025081900)
