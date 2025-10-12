@@ -36,7 +36,6 @@ require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
  * Tests for the attempt_report class
  */
 final class attempt_report_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -75,23 +74,23 @@ final class attempt_report_test extends \advanced_testcase {
             'Quiz header table not found'
         );
         $this->assertMatchesRegularExpression(
-            '/<td[^<>]*>' . preg_quote($rc->course->fullname,
-                '/') . '[^<>]+<\/td>/',
-            $html, 'Course name not found'
+            '/<td[^<>]*>' . preg_quote($rc->course->fullname, '/') . '[^<>]+<\/td>/',
+            $html,
+            'Course name not found'
         );
         $this->assertMatchesRegularExpression(
-            '/<td[^<>]*>' . preg_quote($rc->quiz->name,
-                '/') . '[^<>]+<\/td>/',
-            $html, 'Quiz name not found'
+            '/<td[^<>]*>' . preg_quote($rc->quiz->name, '/') . '[^<>]+<\/td>/',
+            $html,
+            'Quiz name not found'
         );
 
         // Verify overall quiz feedback.
         // TODO (MDL-0): Add proper overall feedback to reference quiz and check its contents.
         $this->assertMatchesRegularExpression(
-            '/<th[^<>]*>\s*' . preg_quote(get_string('feedback',
-                'quiz'),
-                '/'
-            ) . '\s*<\/th>/', $html, 'Overall feedback header not found');
+            '/<th[^<>]*>\s*' . preg_quote(get_string('feedback', 'quiz'), '/') . '\s*<\/th>/',
+            $html,
+            'Overall feedback header not found'
+        );
 
         // Verify questions.
         foreach ($this->getDataGenerator()::QUESTION_TYPES_IN_REFERENCE_QUIZ as $qtype) {
@@ -152,8 +151,8 @@ final class attempt_report_test extends \advanced_testcase {
         $html = $report->generate_full_page(
             $rc->attemptids[0],
             attempt_report_section::cases(),
-            false,  // We need to disable this since $OUTPUT->header() is not working during tests.
-            false,  // We need to disable this since $OUTPUT->header() is not working during tests.
+            false, // We need to disable this since $OUTPUT->header() is not working during tests.
+            false, // We need to disable this since $OUTPUT->header() is not working during tests.
             true
         );
         $this->assertNotEmpty($html, 'Generated report is empty');
@@ -190,7 +189,7 @@ final class attempt_report_test extends \advanced_testcase {
 
         // If the quiz header is disabled, the quiz feedback should also be absent.
         $this->assertDoesNotMatchRegularExpression(
-            '/<th[^<>]*>\s*'.preg_quote(get_string('feedback', 'quiz'), '/').'\s*<\/th>/',
+            '/<th[^<>]*>\s*' . preg_quote(get_string('feedback', 'quiz'), '/') . '\s*<\/th>/',
             $html,
             'Overall feedback header found when it should be absent'
         );
@@ -227,7 +226,7 @@ final class attempt_report_test extends \advanced_testcase {
             'Quiz header table not found'
         );
         $this->assertDoesNotMatchRegularExpression(
-            '/<th[^<>]*>\s*'.preg_quote(get_string('feedback', 'quiz'), '/').'\s*<\/th>/',
+            '/<th[^<>]*>\s*' . preg_quote(get_string('feedback', 'quiz'), '/') . '\s*<\/th>/',
             $html,
             'Overall feedback header found when it should be absent'
         );
@@ -429,7 +428,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Full pattern.
         $fullpattern = 'attempt';
         foreach (attempt_filename_variable::values() as $var) {
-            $fullpattern .= '-${'.$var.'}';
+            $fullpattern .= '-${' . $var . '}';
         }
         $foldername = $report->generate_attempt_filename(
             attemptid: $rc->attemptids[0],
@@ -449,7 +448,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Check that no unsubstituted variables are left.
         foreach (attempt_filename_variable::values() as $var) {
             $this->assertStringNotContainsString(
-                '${'.$var.'}',
+                '${' . $var . '}',
                 $foldername,
                 "Unsubstituted variable '{$var}' found in folder name"
             );
@@ -549,7 +548,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Full pattern.
         $fullpattern = 'attempt';
         foreach (attempt_filename_variable::values() as $var) {
-            $fullpattern .= '-${'.$var.'}';
+            $fullpattern .= '-${' . $var . '}';
         }
         $filename = $report->generate_attempt_filename(
             attemptid: $rc->attemptids[0],
@@ -569,7 +568,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Check that no unsubstituted variables are left.
         foreach (attempt_filename_variable::values() as $var) {
             $this->assertStringNotContainsString(
-                '${'.$var.'}',
+                '${' . $var . '}',
                 $filename,
                 "Unsubstituted variable '{$var}' found in filename"
             );

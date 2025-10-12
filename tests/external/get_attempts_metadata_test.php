@@ -31,7 +31,6 @@ use archivingmod_quiz\type\webservice_status;
  * Tests for the get_attempts_metadata external service
  */
 final class get_attempts_metadata_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -216,5 +215,4 @@ final class get_attempts_metadata_test extends \advanced_testcase {
         $this->assertSame(webservice_status::OK->name, $res['status'], 'The status should be OK.');
         $this->assertArrayHasKey('attempts', $res, 'The response should contain an attempts key.');
     }
-
 }

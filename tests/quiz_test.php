@@ -34,7 +34,6 @@ require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
  * Tests for the quiz class
  */
 final class quiz_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -156,5 +155,4 @@ final class quiz_test extends \advanced_testcase {
             'cake.md attachment not found'
         );
     }
-
 }

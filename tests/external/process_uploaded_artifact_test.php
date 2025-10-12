@@ -33,7 +33,6 @@ use local_archiving\type\filearea;
  * Tests for the process_uploaded_artifact external service
  */
 final class process_uploaded_artifact_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -187,14 +186,14 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         ?string $uuid,
         ?int $taskid,
         ?string $artifactcomponent,
-        ?int    $artifactcontextid,
-        ?int    $artifactuserid,
+        ?int $artifactcontextid,
+        ?int $artifactuserid,
         ?string $artifactfilearea,
         ?string $artifactfilename,
         ?string $artifactfilepath,
-        ?int    $artifactitemid,
+        ?int $artifactitemid,
         ?string $artifactsha256sum,
-        bool    $shouldfail
+        bool $shouldfail
     ): void {
         // Create mock quiz.
         $this->resetAfterTest();
@@ -418,7 +417,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['taskid'],
             $artifact->get_component(),
             $artifact->get_contextid(),
-            (int) $artifact->get_userid(),  // Int cast is required since Moodle likes to return strings here...
+            (int) $artifact->get_userid(), // Int cast is required since Moodle likes to return strings here...
             $artifact->get_filearea(),
             $artifact->get_filename(),
             $artifact->get_filepath(),
@@ -431,5 +430,4 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             'Artifact with mismatching checksum was falsely accepted'
         );
     }
-
 }

@@ -32,7 +32,6 @@ use local_archiving\type\activity_archiving_task_status;
  * Tests for the update_task_status external service
  */
 final class update_task_status_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -373,5 +372,4 @@ final class update_task_status_test extends \advanced_testcase {
             '-10% (invalid)' => [-10, false],
         ];
     }
-
 }

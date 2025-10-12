@@ -32,7 +32,6 @@ use local_archiving\type\filearea;
  * Tests for the archivingmod_quiz_generator class
  */
 final class generator_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -225,7 +224,7 @@ final class generator_test extends \advanced_testcase {
         // Verify artifact file.
         $this->assertNotEmpty($artifact, 'The artifact file was not imported');
         $this->assertEquals(
-            'reference_quiz_artifact'.$extension,
+            'reference_quiz_artifact' . $extension,
             $artifact->get_filename(),
             'The artifact file has the wrong filename'
         );
@@ -281,5 +280,4 @@ final class generator_test extends \advanced_testcase {
             'The temp file has the wrong content'
         );
     }
-
 }

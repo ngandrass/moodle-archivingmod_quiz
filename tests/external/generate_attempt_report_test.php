@@ -31,7 +31,6 @@ use archivingmod_quiz\type\webservice_status;
  * Tests for the generate_attempt_report external service
  */
 final class generate_attempt_report_test extends \advanced_testcase {
-
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -181,7 +180,7 @@ final class generate_attempt_report_test extends \advanced_testcase {
         if (in_array($invalidparameterkey, ['sections'])) {
             // Empty array is actually already detected by Moodle parameter validation so we expect an exception here.
             $this->expectException(\invalid_parameter_exception::class);
-            $this->expectExceptionMessageMatches('/.*'.$invalidparameterkey.'.*/');
+            $this->expectExceptionMessageMatches('/.*' . $invalidparameterkey . '.*/');
         }
         $res = generate_attempt_report::execute(
             $uuid,
@@ -254,5 +253,4 @@ final class generate_attempt_report_test extends \advanced_testcase {
             'Mock quiz does not contain the actual attempt so E_ATTEMPT_NOT_FOUND is expected...'
         );
     }
-
 }
