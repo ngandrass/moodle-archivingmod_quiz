@@ -38,7 +38,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * A client to interface the remote archive worker service
  */
 class remote_archive_worker {
-
     /** @var int Version of the used API */
     public const API_VERSION = 1;
 
@@ -90,7 +89,7 @@ class remote_archive_worker {
         // Moodle curl wrapper automatically closes curl handle after requests. No need to call curl_close() manually.
         // Ignore URL filter since we require custom ports and the URL is only configurable by admins.
         $c = new curl(['ignoresecurity' => true]);
-        $result = $c->get($this->serverurl.'/status', [], [
+        $result = $c->get($this->serverurl . '/status', [], [
             'CURLOPT_CONNECTTIMEOUT' => $this->connectiontimeoutsec,
             'CURLOPT_TIMEOUT' => $this->requesttimeoutsec,
         ]);
@@ -157,7 +156,7 @@ class remote_archive_worker {
 
         foreach ($expectedkeys as $key) {
             if (!isset($settings->{$key})) {
-                throw new \coding_exception('Missing required job setting: '.$key);
+                throw new \coding_exception('Missing required job setting: ' . $key);
             }
         }
 
@@ -174,8 +173,8 @@ class remote_archive_worker {
             "moodle_api" => [
                 "wstoken" => $wstoken,
                 "base_url" => $this->moodlebaseurl,
-                "webservice_url" => $this->moodlebaseurl.'/webservice/rest/server.php',
-                "upload_url" => $this->moodlebaseurl.'/webservice/upload.php',
+                "webservice_url" => $this->moodlebaseurl . '/webservice/rest/server.php',
+                "upload_url" => $this->moodlebaseurl . '/webservice/upload.php',
             ],
             "job" => [
                 "attemptids" => $attemptids,
@@ -220,12 +219,12 @@ class remote_archive_worker {
         // Moodle curl wrapper automatically closes curl handle after requests. No need to call curl_close() manually.
         // Ignore URL filter since we require custom ports and the URL is only configurable by admins.
         $c = new curl(['ignoresecurity' => true]);
-        $result = $c->post($this->serverurl.'/archive/archivingmod_quiz', $payload, [
+        $result = $c->post($this->serverurl . '/archive/archivingmod_quiz', $payload, [
             'CURLOPT_CONNECTTIMEOUT' => $this->connectiontimeoutsec,
             'CURLOPT_TIMEOUT' => $this->requesttimeoutsec,
             'CURLOPT_HTTPHEADER' => [
                 'Content-Type: application/json',
-                'Content-Length: '.strlen($payload),
+                'Content-Length: ' . strlen($payload),
             ],
         ]);
 
@@ -256,5 +255,4 @@ class remote_archive_worker {
             'status' => activity_archiving_task_status::from((int) $data->status),
         ];
     }
-
 }

@@ -30,7 +30,7 @@ use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\cm_state_fingerprint;
 use local_archiving\type\task_content_metadata;
 
-// @codingStandardsIgnoreFile
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -38,7 +38,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Quiz activity archiving driver
  */
 class archivingmod extends \local_archiving\driver\archivingmod {
-
     /** @var \stdClass Course the quiz lives in */
     protected \stdClass $course;
 
@@ -48,11 +47,17 @@ class archivingmod extends \local_archiving\driver\archivingmod {
     /** @var int ID of the targeted quiz */
     protected int $quizid;
 
+    /**
+     * Creates a new activity archiving driver instance.
+     *
+     * @param \context_module $context
+     * @throws \moodle_exception
+     */
     public function __construct(\context_module $context) {
         parent::__construct($context);
 
         // Try to get course, cm info, and quiz.
-        list($this->course, $this->cm) = get_course_and_cm_from_cmid($this->cmid, 'quiz');
+        [$this->course, $this->cm] = get_course_and_cm_from_cmid($this->cmid, 'quiz');
         if (empty($this->cm)) {
             throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz');
         }
@@ -142,27 +147,27 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             );
             $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
 
-            // TODO: Error handling
+            // TODO (MDL-0): Error handling.
             $task->set_status(activity_archiving_task_status::AWAITING_PROCESSING);
             throw new yield_exception();
         }
 
         if ($task->get_status(usecached: true) == activity_archiving_task_status::AWAITING_PROCESSING) {
-            // TODO: Check for timeout. Probably on job level?
+            // TODO (MDL-0): Check for timeout. Probably on job level?
 
             // Task status is updated by the worker.
             throw new yield_exception();
         }
 
         if ($task->get_status(usecached: true) == activity_archiving_task_status::RUNNING) {
-            // TODO: Check for timeout. Probably on job level?
+            // TODO (MDL-0): Check for timeout. Probably on job level?
 
             // Task status is updated by the worker.
             throw new yield_exception();
         }
 
         if ($task->get_status(usecached: true) == activity_archiving_task_status::FINALIZING) {
-            // TODO: Check for timeout. Probably on job level?
+            // TODO (MDL-0): Check for timeout. Probably on job level?
 
             // Task is finalized by process_uploaded_artifact webservice function.
             throw new yield_exception();
@@ -219,5 +224,4 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             'attempttimemodified' => $attempttimemodified,
         ]);
     }
-
 }

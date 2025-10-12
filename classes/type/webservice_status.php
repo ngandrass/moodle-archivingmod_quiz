@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Status codes a webservice function can respond with
  */
 enum webservice_status {
-
     /** @var self Success */
     case OK;
 
@@ -89,5 +88,4 @@ enum webservice_status {
 
     /** @var self Storing a file failed */
     case E_STORING_FAILED;
-
 }

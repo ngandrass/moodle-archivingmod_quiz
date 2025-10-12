@@ -41,7 +41,6 @@ use local_archiving\type\activity_archiving_task_status;
  * API endpoint to update the status of a quiz archiving task
  */
 class update_task_status extends external_api {
-
     /**
      * Returns description of method parameters
      *
@@ -105,9 +104,9 @@ class update_task_status extends external_api {
      */
     public static function execute(
         string $uuidraw,
-        int    $taskidraw,
-        int    $statusraw,
-        ?int   $progressraw = null
+        int $taskidraw,
+        int $statusraw,
+        ?int $progressraw = null
     ): array {
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
@@ -161,5 +160,4 @@ class update_task_status extends external_api {
 
         return ['status' => webservice_status::OK->name];
     }
-
 }

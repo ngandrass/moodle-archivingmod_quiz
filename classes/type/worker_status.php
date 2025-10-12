@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Status values the worker service can report
  */
 enum worker_status: string {
-
     /** @var self Worker service is idle (no jobs present) */
     case IDLE = 'IDLE';
 
@@ -47,5 +46,4 @@ enum worker_status: string {
 
     /** @var self Worker service status is unknown */
     case UNKNOWN = 'UNKNOWN';
-
 }

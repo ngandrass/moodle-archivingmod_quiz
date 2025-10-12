@@ -25,7 +25,7 @@
 use archivingmod_quiz\form\autoinstall_form;
 use archivingmod_quiz\local\autoinstall;
 
-require_once(__DIR__.'/../../../../../config.php');
+require_once(__DIR__ . '/../../../../../config.php');
 require_once("{$CFG->libdir}/moodlelib.php");
 
 
@@ -63,11 +63,11 @@ if (autoinstall::plugin_is_unconfigured()) {
 
     if ($form->is_cancelled()) {
         // Cancelled.
-        echo '<p>'.get_string('autoinstall_cancelled', 'archivingmod_quiz').'</p>';
-        echo '<p>'.$returnlink.'</p>';
+        echo '<p>' . get_string('autoinstall_cancelled', 'archivingmod_quiz') . '</p>';
+        echo '<p>' . $returnlink . '</p>';
     } else if ($data = $form->get_data()) {
         // Perform autoinstall.
-        list($success, $log) = autoinstall::execute(
+        [$success, $log] = autoinstall::execute(
             $data->workerurl,
             $data->wsname,
             $data->rolename,
@@ -75,25 +75,25 @@ if (autoinstall::plugin_is_unconfigured()) {
         );
 
         // Show result.
-        echo '<p>'.get_string('autoinstall_started', 'archivingmod_quiz').'</p>';
-        echo '<p>'.get_string('logs').'</p>';
+        echo '<p>' . get_string('autoinstall_started', 'archivingmod_quiz') . '</p>';
+        echo '<p>' . get_string('logs') . '</p>';
         echo "<pre>{$log}</pre><br/>";
 
         if ($success) {
-            echo '<p>'.get_string('autoinstall_success', 'archivingmod_quiz').'</p>';
+            echo '<p>' . get_string('autoinstall_success', 'archivingmod_quiz') . '</p>';
         } else {
-            echo '<p>'.get_string('autoinstall_failure', 'archivingmod_quiz').'</p>';
+            echo '<p>' . get_string('autoinstall_failure', 'archivingmod_quiz') . '</p>';
         }
 
-        echo '<p>'.$returnlink.'</p>';
+        echo '<p>' . $returnlink . '</p>';
     } else {
-        echo '<p>'.get_string('autoinstall_explanation', 'archivingmod_quiz').'</p>';
-        echo '<p>'.get_string('autoinstall_explanation_details', 'archivingmod_quiz').'</p>';
+        echo '<p>' . get_string('autoinstall_explanation', 'archivingmod_quiz') . '</p>';
+        echo '<p>' . get_string('autoinstall_explanation_details', 'archivingmod_quiz') . '</p>';
         $form->display();
     }
 } else {
-    echo '<p>'.get_string('autoinstall_already_configured_long', 'archivingmod_quiz').'</p>';
-    echo '<p>'.$returnlink.'</p>';
+    echo '<p>' . get_string('autoinstall_already_configured_long', 'archivingmod_quiz') . '</p>';
+    echo '<p>' . $returnlink . '</p>';
 }
 
 // End page.

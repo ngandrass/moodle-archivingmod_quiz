@@ -46,7 +46,6 @@ require_once("$CFG->dirroot/mod/quiz/locallib.php");  // @codeCoverageIgnore
  * attempt out of a given quiz and rendering it as HTML.
  */
 class attempt_report {
-
     // @codingStandardsIgnoreStart
     /** @var string Regex for URLs of qtype_stack plots */
     protected const REGEX_MOODLE_URL_STACKPLOT = '/^(?P<wwwroot>https?:\/\/.+)?(\/question\/type\/stack\/plot\.php\/)(?P<filename>[^\/\#\?\&]+\.(png|svg))$/m';
@@ -160,7 +159,7 @@ class attempt_report {
             // User ID number.
             $quizheaderdata['useridnumber'] = [
                 'title' => get_string('idnumber'),
-                'content' => $attemptuser->idnumber ?: '<i>'.get_string('none').'</i>',
+                'content' => $attemptuser->idnumber ?: '<i>' . get_string('none') . '</i>',
             ];
 
             // Quiz metadata.
@@ -230,8 +229,7 @@ class attempt_report {
                     $a->grade = \html_writer::tag('b', quiz_format_grade($quiz, $grade));
                     $a->maxgrade = quiz_format_grade($quiz, $quiz->grade);
                     if ($quiz->grade != 100) {
-                        $a->percent = \html_writer::tag('b', format_float(
-                            $attempt->sumgrades * 100 / $quiz->sumgrades, 0));
+                        $a->percent = \html_writer::tag('b', format_float($attempt->sumgrades * 100 / $quiz->sumgrades, 0));
                         $formattedgrade = get_string('outofpercent', 'quiz', $a);
                     } else {
                         $formattedgrade = get_string('outof', 'quiz', $a);
@@ -251,7 +249,7 @@ class attempt_report {
                 $feedback = $attemptobj->get_overall_feedback($grade);
                 $quizheaderdata['feedback'] = [
                     'title' => get_string('feedback', 'quiz'),
-                    'content' => $feedback ?: '<i>'.get_string('none').'</i>',
+                    'content' => $feedback ?: '<i>' . get_string('none') . '</i>',
                 ];
             }
 
@@ -292,7 +290,8 @@ class attempt_report {
                 // Render question as HTML.
                 if ($slot != $originalslot) {
                     $attemptobj->get_question_attempt($slot)->set_max_mark(
-                        $attemptobj->get_question_attempt($originalslot)->get_max_mark());
+                        $attemptobj->get_question_attempt($originalslot)->get_max_mark()
+                    );
                 }
                 $html .= $quba->render_question($slot, $displayoptions, $number);
             }
@@ -322,11 +321,11 @@ class attempt_report {
      * @throws \DOMException
      */
     public function generate_full_page(
-        int   $attemptid,
+        int $attemptid,
         array $sections,
-        bool  $fixrelativeurls = true,
-        bool  $minimal = true,
-        bool  $inlineimages = true
+        bool $fixrelativeurls = true,
+        bool $minimal = true,
+        bool $inlineimages = true
     ): string {
         global $CFG, $OUTPUT, $PAGE;
 
@@ -421,7 +420,7 @@ class attempt_report {
 
         // Convert relative URLs to absolute URLs.
         $config = get_config('archivingmod_quiz');
-        $moodlebaseurl = rtrim($config->internal_wwwroot ?: $CFG->wwwroot, '/').'/';
+        $moodlebaseurl = rtrim($config->internal_wwwroot ?: $CFG->wwwroot, '/') . '/';
         if ($config->internal_wwwroot) {
             $imgsrc = str_replace(rtrim($CFG->wwwroot, '/'), rtrim($config->internal_wwwroot, '/'), $imgsrc);
         }
@@ -476,7 +475,7 @@ class attempt_report {
                     $regexmatches['component'],
                     $regexmatches['filearea'],
                     !empty($regexmatches['itemid']) ? $regexmatches['itemid'] : 0,
-                    '/',  // Dirty simplification but works for now *sigh*.
+                    '/', // Dirty simplification but works for now *sigh*.
                     $regexmatches['filename'],
                 );
 
@@ -543,7 +542,7 @@ class attempt_report {
             return false;
         }
         $imgbase64 = base64_encode($imgdata);
-        $img->setAttribute('src', 'data:'.$imgmime.';base64,'.$imgbase64);
+        $img->setAttribute('src', 'data:' . $imgmime . ';base64,' . $imgbase64);
 
         return true;
     }
@@ -565,7 +564,7 @@ class attempt_report {
 
         // Queries and anchors.
         if ($url[0] == '#' || $url[0] == '?') {
-            return $base.$url;
+            return $base . $url;
         }
 
         // Parse base URL and convert to local variables: $scheme, $host, $path.
@@ -592,7 +591,7 @@ class attempt_report {
         }
 
         // Absolute URL is ready!
-        return $scheme.'://'.$abs;
+        return $scheme . '://' . $abs;
     }
 
     /**
@@ -653,7 +652,7 @@ class attempt_report {
         $filename = $pattern;
         foreach ($data as $key => $value) {
             $filename = preg_replace(
-                '/\$\{\s*'.$key.'\s*\}/m',
+                '/\$\{\s*' . $key . '\s*\}/m',
                 substr($value, 0, storage::FILENAME_VARIABLE_MAX_LENGTH),
                 $filename
             );
@@ -661,5 +660,4 @@ class attempt_report {
 
         return $isfoldername ? storage::sanitize_filename($filename) : storage::sanitize_foldername($filename);
     }
-
 }

@@ -38,7 +38,6 @@ require_once("$CFG->dirroot/mod/quiz/locallib.php");  // @codeCoverageIgnore
  * quizzes during the archiving process.
  */
 class quiz_manager {
-
     /** @var \stdClass Course object this instance is associated with */
     protected \stdClass $course;
 
@@ -65,7 +64,7 @@ class quiz_manager {
         global $DB;
 
         // Validate arguments.
-        list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'quiz');
+        [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'quiz');
         $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
         if ($course->id != $courseid) {
             throw new \moodle_exception('invalidcourseid', 'local_archiving');
@@ -265,5 +264,4 @@ class quiz_manager {
 
         return $res;
     }
-
 }

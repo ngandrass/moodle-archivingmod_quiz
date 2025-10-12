@@ -38,7 +38,7 @@ $defaultwsname = autoinstall::DEFAULT_WSNAME;
 $defaultroleshortname = autoinstall::DEFAULT_ROLESHORTNAME;
 $defaultusername = autoinstall::DEFAULT_USERNAME;
 
-list($options, $unrecognised) = cli_get_params(
+[$options, $unrecognised] = cli_get_params(
     [
         'help' => false,
         'workerurl' => $defaultworkerurl,
@@ -94,7 +94,7 @@ $USER = get_admin();
 cli_writeln("Starting automatic installation of archivingmod_quiz plugin...");
 cli_separator();
 
-list($success, $log) = autoinstall::execute(
+[$success, $log] = autoinstall::execute(
     $options['workerurl'],
     $options['wsname'],
     $options['rolename'],
@@ -102,7 +102,7 @@ list($success, $log) = autoinstall::execute(
     $options['force']
 );
 
-cli_write($log."\r\n");
+cli_write($log . "\r\n");
 
 if ($success) {
     cli_separator();

@@ -45,7 +45,6 @@ use local_archiving\storage;
  * archiving task
  */
 class generate_attempt_report extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -82,7 +81,7 @@ class generate_attempt_report extends external_api {
                     array_map(fn($section) => $section->value, attempt_report_section::cases()),
                     array_map(fn($section) => new external_value(
                         PARAM_BOOL,
-                        'Whether to include the '.$section->name.' section',
+                        'Whether to include the ' . $section->name . ' section',
                         VALUE_REQUIRED
                     ), attempt_report_section::cases())
                 ),
@@ -187,12 +186,12 @@ class generate_attempt_report extends external_api {
      */
     public static function execute(
         string $uuidraw,
-        int    $taskidraw,
-        int    $attemptidraw,
+        int $taskidraw,
+        int $attemptidraw,
         string $foldernamepatternraw,
         string $filenamepatternraw,
-        array  $sectionsraw,
-        bool   $attachmentsraw
+        array $sectionsraw,
+        bool $attachmentsraw
     ): array {
         global $PAGE;
 
@@ -220,18 +219,22 @@ class generate_attempt_report extends external_api {
         }
 
         // Validate folder and filename pattern.
-        if (!storage::is_valid_filename_pattern(
-            $params['foldernamepattern'],
-            attempt_filename_variable::values(),
-            storage::FOLDERNAME_FORBIDDEN_CHARACTERS
-        )) {
+        if (
+            !storage::is_valid_filename_pattern(
+                $params['foldernamepattern'],
+                attempt_filename_variable::values(),
+                storage::FOLDERNAME_FORBIDDEN_CHARACTERS
+            )
+        ) {
             return ['status' => webservice_status::E_INVALID_FOLDERNAME_PATTERN->name];
         }
-        if (!storage::is_valid_filename_pattern(
-            $params['filenamepattern'],
-            attempt_filename_variable::values(),
-            storage::FILENAME_FORBIDDEN_CHARACTERS
-        )) {
+        if (
+            !storage::is_valid_filename_pattern(
+                $params['filenamepattern'],
+                attempt_filename_variable::values(),
+                storage::FILENAME_FORBIDDEN_CHARACTERS
+            )
+        ) {
             return ['status' => webservice_status::E_INVALID_FILENAME_PATTERN->name];
         }
 
@@ -293,5 +296,4 @@ class generate_attempt_report extends external_api {
         // phpcs:ignore
         // @codeCoverageIgnoreEnd
     }
-
 }

@@ -43,7 +43,6 @@ use local_archiving\type\activity_archiving_task_status;
  * archiver worker service
  */
 class process_uploaded_artifact extends external_api {
-
     /**
      * Returns description of method parameters
      *
@@ -140,14 +139,14 @@ class process_uploaded_artifact extends external_api {
      */
     public static function execute(
         string $uuidraw,
-        int    $taskidraw,
+        int $taskidraw,
         string $artifactcomponentraw,
-        int    $artifactcontextidraw,
-        int    $artifactuseridraw,
+        int $artifactcontextidraw,
+        int $artifactuseridraw,
         string $artifactfilearearaw,
         string $artifactfilenameraw,
         string $artifactfilepathraw,
-        int    $artifactitemidraw,
+        int $artifactitemidraw,
         string $artifactsha256sumraw
     ): array {
         // Validate request.
@@ -228,5 +227,4 @@ class process_uploaded_artifact extends external_api {
         ];
         // @codeCoverageIgnoreEnd
     }
-
 }

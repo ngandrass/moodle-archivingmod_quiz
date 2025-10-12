@@ -30,14 +30,13 @@ use archivingmod_quiz\local\autoinstall;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
-require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
+require_once($CFG->dirroot . '/lib/formslib.php'); // @codeCoverageIgnore
 
 
 /**
  * Form to trigger automatic installation of the archivingmod_quiz plugin
  */
 class autoinstall_form extends \moodleform {
-
     /**
      * Form definiton.
      *
@@ -76,5 +75,4 @@ class autoinstall_form extends \moodleform {
         // Action buttons.
         $this->add_action_buttons(true, get_string('confirm'));
     }
-
 }

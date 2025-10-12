@@ -82,5 +82,4 @@ enum attempt_report_section: string {
             default => [],
         };
     }
-
 }

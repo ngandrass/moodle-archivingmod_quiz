@@ -31,14 +31,13 @@ use local_archiving\type\paper_format;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
+require_once($CFG->dirroot . '/lib/formslib.php'); // @codeCoverageIgnore
 
 
 /**
  * Form to initiate a new quiz archive job
  */
 class job_create_form extends \local_archiving\form\job_create_form {
-
     #[\Override]
     protected function definition_base_settings(): void {
         // Options: Attempts.
@@ -56,25 +55,26 @@ class job_create_form extends \local_archiving\form\job_create_form {
         foreach (attempt_report_section::cases() as $section) {
             $this->_form->addElement(
                 'advcheckbox',
-                'report_section_'.$section->value,
+                'report_section_' . $section->value,
                 '&nbsp;',
-                get_string('task_report_section_'.$section->value, 'archivingmod_quiz'),
-                $this->config->handler->{'job_preset_report_section_'.$section->value.'_locked'} ? 'disabled' : null
+                get_string('task_report_section_' . $section->value, 'archivingmod_quiz'),
+                $this->config->handler->{'job_preset_report_section_' . $section->value . '_locked'} ? 'disabled' : null
             );
             $this->_form->addHelpButton(
-                'report_section_'.$section->value, 'task_report_section_'.$section->value,
+                'report_section_' . $section->value,
+                'task_report_section_' . $section->value,
                 'archivingmod_quiz'
             );
             $this->_form->setDefault(
-                'report_section_'.$section->value,
-                $this->config->handler->{'job_preset_report_section_'.$section->value}
+                'report_section_' . $section->value,
+                $this->config->handler->{'job_preset_report_section_' . $section->value}
             );
 
-            if (!$this->config->handler->{'job_preset_report_section_'.$section->value.'_locked'}) {
+            if (!$this->config->handler->{'job_preset_report_section_' . $section->value . '_locked'}) {
                 foreach ($section->dependencies() as $dependency) {
                     $this->_form->disabledIf(
-                        'report_section_'.$section->value,
-                        'report_section_'.$dependency->value,
+                        'report_section_' . $section->value,
+                        'report_section_' . $dependency->value,
                         'notchecked'
                     );
                 }
@@ -270,9 +270,9 @@ class job_create_form extends \local_archiving\form\job_create_form {
             [
                 'variables' => array_reduce(
                     attempt_filename_variable::values(),
-                    fn($res, $varname) => $res."<li>".
-                        "<code>\${".$varname."}</code>: ".
-                        get_string('task_attempt_filename_pattern_variable_'.$varname, 'archivingmod_quiz').
+                    fn($res, $varname) => $res . "<li>" .
+                        "<code>\${" . $varname . "}</code>: " .
+                        get_string('task_attempt_filename_pattern_variable_' . $varname, 'archivingmod_quiz') .
                         "</li>",
                     ""
                 ),
@@ -298,19 +298,23 @@ class job_create_form extends \local_archiving\form\job_create_form {
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
-        if (!storage::is_valid_filename_pattern(
-            $data['attempt_foldername_pattern'],
-            attempt_filename_variable::values(),
-            storage::FOLDERNAME_FORBIDDEN_CHARACTERS
-        )) {
+        if (
+            !storage::is_valid_filename_pattern(
+                $data['attempt_foldername_pattern'],
+                attempt_filename_variable::values(),
+                storage::FOLDERNAME_FORBIDDEN_CHARACTERS
+            )
+        ) {
             $errors['attempt_foldername_pattern'] = get_string('error_invalid_attempt_foldername_pattern', 'local_archiving');
         }
 
-        if (!storage::is_valid_filename_pattern(
-            $data['attempt_filename_pattern'],
-            attempt_filename_variable::values(),
-            storage::FILENAME_FORBIDDEN_CHARACTERS
-        )) {
+        if (
+            !storage::is_valid_filename_pattern(
+                $data['attempt_filename_pattern'],
+                attempt_filename_variable::values(),
+                storage::FILENAME_FORBIDDEN_CHARACTERS
+            )
+        ) {
             $errors['attempt_filename_pattern'] = get_string('error_invalid_attempt_filename_pattern', 'local_archiving');
         }
 
@@ -339,5 +343,4 @@ class job_create_form extends \local_archiving\form\job_create_form {
 
         return $data;
     }
-
 }

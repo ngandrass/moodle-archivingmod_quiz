@@ -1,5 +1,10 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDXX)
+
+- Refactor code to comply with new Moodle coding standard v3.6
+
+
 ## Version 0.2.0 (2025092100)
 
 - Implement course module state fingerprinting based on quiz and attempt modification times

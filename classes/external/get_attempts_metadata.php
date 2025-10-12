@@ -42,7 +42,6 @@ use local_archiving\activity_archiving_task;
  * API endpoint to access quiz attempt metadata in bulk
  */
 class get_attempts_metadata extends external_api {
-
     /**
      * Returns description of method parameters
      *
@@ -173,8 +172,8 @@ class get_attempts_metadata extends external_api {
      */
     public static function execute(
         string $uuidraw,
-        int    $taskidraw,
-        array  $attemptidsraw
+        int $taskidraw,
+        array $attemptidsraw
     ): array {
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
@@ -210,5 +209,4 @@ class get_attempts_metadata extends external_api {
             'status' => webservice_status::OK->name,
         ];
     }
-
 }
