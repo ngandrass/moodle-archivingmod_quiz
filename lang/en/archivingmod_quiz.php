@@ -30,7 +30,7 @@ $string['a'] = '{$a}';
 $string['archived'] = 'Archived';
 
 // Privacy.
-$string['privacy:metadata'] = 'TODO';
+$string['privacy:metadata'] = 'This plugin does not store any personal data directly, but passes everything to local_archiving instead.';
 
 // Task settings: General.
 $string['task_export_attempts'] = 'Export quiz attempts';

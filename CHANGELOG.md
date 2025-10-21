@@ -1,5 +1,10 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDXX)
+
+- Finalize Moodle privacy API provider
+
+
 ## Version 0.3.0 (2025101300)
 
 - Ensure Moodle 5.1 compatibility
