@@ -6,6 +6,7 @@
 - Remove superfluous admin settings for manual web service setups
 - Remove superfluous autoinstall feature that was superseded by the statically provided web service
 - Finalize Moodle privacy API provider
+- Adapt web service unit tests to latest activity archiving task access token invalidation behavior
 
 
 ## Version 0.3.0 (2025101300)

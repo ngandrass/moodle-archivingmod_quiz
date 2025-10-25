@@ -177,7 +177,8 @@ class process_uploaded_artifact extends external_api {
 
         // Do not allow uploading of artifacts for finished jobs.
         if ($task->is_completed()) {
-            return ['status' => webservice_status::E_NO_UPLOAD_EXPECTED->name];
+            // This is just a safeguard since web service tokens should be invalidated once a task completes.
+            return ['status' => webservice_status::E_NO_UPLOAD_EXPECTED->name]; // @codeCoverageIgnore
         }
 
         // Find uploaded file (draftfile).

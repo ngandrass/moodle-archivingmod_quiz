@@ -141,7 +141,8 @@ class update_task_status extends external_api {
 
         // Do not alter the status if the task is already completed.
         if ($task->is_completed()) {
-            return ['status' => webservice_status::E_ALREADY_COMPLETED->name];
+            // This is just a safeguard since web service tokens should be invalidated once a task completes.
+            return ['status' => webservice_status::E_ALREADY_COMPLETED->name]; // @codeCoverageIgnore
         }
 
         // Update status.

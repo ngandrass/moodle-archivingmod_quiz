@@ -344,7 +344,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['artifact_sha256sum']
         );
         $this->assertSame(
-            webservice_status::E_NO_UPLOAD_EXPECTED->name,
+            webservice_status::E_ACCESS_DENIED->name,
             $res['status'],
             'Completed task accepted another artifact upload'
         );
