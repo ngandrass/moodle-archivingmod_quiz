@@ -27,6 +27,7 @@ use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
+use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
 use local_archiving\type\paper_format;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -77,6 +78,13 @@ if ($hassiteconfig) {
             get_string('setting_header_archive_worker_desc', 'archivingmod_quiz')
         ));
 
+        // Worker service: Global webservice settings.
+        $settings->add(new admin_setting_webservice_enabler(
+            'archivingmod_quiz/webservice_enabler',
+            get_string('setting_webservice_enabler', 'archivingmod_quiz'),
+            get_string('setting_webservice_enabler_desc', 'archivingmod_quiz')
+        ));
+
         // Worker service: URL.
         $settings->add(new admin_setting_configtext(
             'archivingmod_quiz/worker_url',
@@ -84,24 +92,6 @@ if ($hassiteconfig) {
             get_string('setting_worker_url_desc', 'archivingmod_quiz'),
             '',
             PARAM_TEXT
-        ));
-
-        // Worker service: Webservice.
-        $settings->add(new admin_setting_configselect(
-            'archivingmod_quiz/webservice_id',
-            get_string('webservice', 'webservice'),
-            get_string('setting_webservice_desc', 'archivingmod_quiz'),
-            null,
-            [-1 => ''] + $DB->get_records_menu('external_services', null, 'name ASC', 'id, name')
-        ));
-
-        // Worker service: Webservice user.
-        $settings->add(new admin_setting_configtext(
-            'archivingmod_quiz/webservice_userid',
-            get_string('setting_webservice_userid', 'archivingmod_quiz'),
-            get_string('setting_webservice_userid_desc', 'archivingmod_quiz'),
-            '',
-            PARAM_INT
         ));
 
         // Worker service: Custom Moodle base URL.

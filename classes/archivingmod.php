@@ -75,14 +75,15 @@ class archivingmod extends \local_archiving\driver\archivingmod {
         $config = get_config('archivingmod_quiz');
 
         if (
-            intval($config->webservice_id ?? 0) <= 0 ||
-            intval($config->webservice_userid ?? 0) <= 0 ||
-            strlen($config->worker_url ?? '') < 1
+            strlen($config->worker_url ?? '') > 1 &&
+            self::get_webserviceid() > 0 &&
+            self::is_webservices_enabled() &&
+            self::is_webserviceproto_rest_enabled()
         ) {
-            return false;
-        } else {
             return true;
         }
+
+        return false;
     }
 
 
@@ -115,8 +116,6 @@ class archivingmod extends \local_archiving\driver\archivingmod {
 
     #[\Override]
     public function execute_task(activity_archiving_task $task): void {
-        global $DB;
-
         if ($task->get_status(usecached: true) == activity_archiving_task_status::UNINITIALIZED) {
             $task->set_status(activity_archiving_task_status::CREATED);
         }
@@ -126,12 +125,8 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             $quizmanager = quiz_manager::from_context($task->get_context());
             $attempts = $quizmanager->get_attempts();
 
-            $webserviceid = $DB->get_field('external_services', 'id', ['shortname' => self::WEB_SERVICE_SHORTNAME], IGNORE_MISSING);
-            if (!$webserviceid) {
-                throw new \coding_exception('Web service not found: ' . self::WEB_SERVICE_SHORTNAME);
-            }
             $wstoken = $task->create_webservice_token(
-                webserviceid: $webserviceid,
+                webserviceid: self::get_webserviceid(),
                 userid: get_admin()->id,
                 lifetimesec: get_config('local_archiving', 'job_timeout_min') * MINSECS
             );
@@ -233,5 +228,43 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             'quiztimemodified' => $quiztimemodified,
             'attempttimemodified' => $attempttimemodified,
         ]);
+    }
+
+    /**
+     * Retrieves the ID of the self::WEB_SERVICE_SHORTNAME web service
+     *
+     * @return int ID of the web service
+     * @throws \dml_exception If the web service could not be found (should never happen,
+     * but who knows all the weird stats a Moodle instance can be in ...)
+     */
+    public static function get_webserviceid(): int {
+        global $DB;
+
+        return $DB->get_field(
+            'external_services',
+            'id',
+            ['shortname' => self::WEB_SERVICE_SHORTNAME],
+            MUST_EXIST
+        );
+    }
+
+    /**
+     * Determines if web services are enabled globally.
+     *
+     * @return bool True, if web services are enabled, false otherwise
+     * @throws \dml_exception
+     */
+    public static function is_webservices_enabled(): bool {
+        return get_config('core', 'enablewebsertices') == true;
+    }
+
+    /**
+     * Determines if the web service protocol "REST" is enabled globally.
+     *
+     * @return bool True, if REST protocol is enabled, false otherwise
+     * @throws \dml_exception
+     */
+    public static function is_webserviceproto_rest_enabled(): bool {
+        return stripos(get_config('core', 'webserviceprotocols'), 'rest') !== false;
     }
 }

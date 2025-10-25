@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDXX)
 
 - Bundle web service functions for worker communication inside a statically provided web service
+- Remove superfluous admin settings for manual web service setups
 - Finalize Moodle privacy API provider
 
 
