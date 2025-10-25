@@ -114,25 +114,6 @@ $string['setting_webservice_enabler_desc'] = 'This plugin uses Moodle web servic
 $string['setting_worker_url'] = 'Archive worker URL';
 $string['setting_worker_url_desc'] = 'URL of the archive worker service to call for quiz archive task execution. If you only want to try the Quiz Archiver, you can use the <a href="https://quizarchiver.gandrass.de/installation/archiveworker/#using-the-free-public-demo-service" target="_blank">free public demo quiz archive worker service</a>, eliminating the need to set up your own worker service right away.<br/>Example: <code>http://127.0.0.1:8080</code> or <code>http://moodle-quiz-archive-worker:8080</code>';
 
-// Autoinstall.
-$string['autoinstall_already_configured'] = 'Plugin is already configured';
-$string['autoinstall_already_configured_long'] = 'The archivingmod_quiz plugin is already configured. Automatic configuration is not possible twice.';
-$string['autoinstall_cancelled'] = 'The automatic configuration of the archivingmod_quiz Plugin was cancelled. No changes were made.';
-$string['autoinstall_explanation'] = 'The archivingmod_quiz plugin requires a few initial configuration steps to work (see <a href="https://quizarchiver.gandrass.de/configuration/" target="_blank">Configuration</a>). You can either configure all of these settings manually or use the automatic configuration feature to take care of all Moodle related settings.';
-$string['autoinstall_explanation_details'] = 'The automatic configuration feature will take care of the following steps:<ul><li>Setting all plugin settings to their default values</li><li>Enabling web services and REST protocol</li><li>Creating a quiz archive worker service role and a corresponding user</li><li>Creating a new web service with all required webservice functions</li><li>Authorising the user to use the webservice</li></ul>';
-$string['autoinstall_failure'] = 'The automatic configuration of the archivingmod_quiz Plugin has <b>failed</b>.';
-$string['autoinstall_plugin'] = 'Quiz Archiver: Automatic configuration';
-$string['autoinstall_started'] = 'Automatic configuration started ...';
-$string['autoinstall_start_now'] = 'Start automatic configuration now';
-$string['autoinstall_success'] = 'The automatic configuration of the archivingmod_quiz Plugin was <b>successful</b>.';
-$string['autoinstall_rolename'] = 'Role name';
-$string['autoinstall_rolename_help'] = 'Name of the role that is created for the quiz archive worker service user.';
-$string['autoinstall_username'] = 'Username';
-$string['autoinstall_username_help'] = 'Name of the service user that is created to access the archivingmod_quiz webservice.';
-$string['autoinstall_wsname'] = 'Web service name';
-$string['autoinstall_wsname_help'] = 'Name of the webservice that is created for the quiz archive worker.';
-$string['manual_configuration_continue'] = 'To manually configure all plugin settings use the "Continue" button at the bottom of this page.';
-
 // Remote archive worker.
 $string['remote_worker_enqueue_job_failed'] = 'Failed to enqueue archive job at the remote archive worker service.';
 $string['remote_worker_enqueue_job_failed_a'] = 'Failed to enqueue archive job at the remote archive worker service: {$a}';
