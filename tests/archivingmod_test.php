@@ -118,6 +118,16 @@ final class archivingmod_test extends \advanced_testcase {
         $this->assertFalse($driver->can_be_archived(), 'Quiz without questions should not be archivable.');
     }
 
+    /**
+     * Tests the task execution flow.
+     *
+     * @covers \archivingmod_quiz\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws yield_exception
+     */
     public function test_execute(): void {
         // Prepare a mock task.
         $this->resetAfterTest();
