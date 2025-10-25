@@ -47,6 +47,9 @@ class archivingmod extends \local_archiving\driver\archivingmod {
     /** @var int ID of the targeted quiz */
     protected int $quizid;
 
+    /** @var string Short-name of the web service the external worker uses for communication with Moodle */
+    public const WEB_SERVICE_SHORTNAME = 'archivingmod_quiz_ws';
+
     /**
      * Creates a new activity archiving driver instance.
      *
@@ -112,6 +115,8 @@ class archivingmod extends \local_archiving\driver\archivingmod {
 
     #[\Override]
     public function execute_task(activity_archiving_task $task): void {
+        global $DB;
+
         if ($task->get_status(usecached: true) == activity_archiving_task_status::UNINITIALIZED) {
             $task->set_status(activity_archiving_task_status::CREATED);
         }
@@ -120,9 +125,14 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             // Prepare access to quiz and webservice.
             $quizmanager = quiz_manager::from_context($task->get_context());
             $attempts = $quizmanager->get_attempts();
+
+            $webserviceid = $DB->get_field('external_services', 'id', ['shortname' => self::WEB_SERVICE_SHORTNAME], IGNORE_MISSING);
+            if (!$webserviceid) {
+                throw new \coding_exception('Web service not found: ' . self::WEB_SERVICE_SHORTNAME);
+            }
             $wstoken = $task->create_webservice_token(
-                webserviceid: get_config('archivingmod_quiz', 'webservice_id'),
-                userid: get_config('archivingmod_quiz', 'webservice_userid'),
+                webserviceid: $webserviceid,
+                userid: get_admin()->id,
                 lifetimesec: get_config('local_archiving', 'job_timeout_min') * MINSECS
             );
 
