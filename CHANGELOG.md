@@ -2,9 +2,10 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
-- Bundle web service functions for worker communication inside a statically provided web service
-- Remove superfluous admin settings for manual web service setups
-- Remove superfluous autoinstall feature that was superseded by the statically provided web service
+- Simplify web service setup process
+    - Bundle web service functions for worker communication inside a statically provided web service
+    - Remove superfluous admin settings for manual web service setups
+    - Remove superfluous autoinstall feature that was superseded by the statically provided web service
 - Finalize Moodle privacy API provider
 - Adapt web service unit tests to latest activity archiving task access token invalidation behavior
 
