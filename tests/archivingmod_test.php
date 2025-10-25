@@ -26,6 +26,9 @@ namespace archivingmod_quiz;
 
 
 // phpcs:ignore
+use local_archiving\activity_archiving_task;
+use local_archiving\exception\yield_exception;
+use local_archiving\type\activity_archiving_task_status;
 
 /**
  * Tests for the archivingmod class
@@ -101,18 +104,107 @@ final class archivingmod_test extends \advanced_testcase {
 
         // Test that a quiz with a question and an attempt is considered archivable.
         $mocks = $this->getDataGenerator()->create_mock_quiz(createquestion: true, createattempt: true);
-        $driver = new archivingmod(\context_module::instance($mocks->quiz->cmid));
+        $driver = new archivingmod($mocks->context);
         $this->assertTrue($driver->can_be_archived(), 'Quiz with questions and attempts should be archivable.');
 
         // Test that a quiz without an attempt is not considered archivable.
         $mocks = $this->getDataGenerator()->create_mock_quiz(createquestion: true, createattempt: false);
-        $driver = new archivingmod(\context_module::instance($mocks->quiz->cmid));
+        $driver = new archivingmod($mocks->context);
         $this->assertFalse($driver->can_be_archived(), 'Quiz without attempts should not be archivable.');
 
         // Test that a quiz without a question is not considered archivable.
         $mocks = $this->getDataGenerator()->create_mock_quiz(createquestion: false, createattempt: false);
-        $driver = new archivingmod(\context_module::instance($mocks->quiz->cmid));
+        $driver = new archivingmod($mocks->context);
         $this->assertFalse($driver->can_be_archived(), 'Quiz without questions should not be archivable.');
+    }
+
+    public function test_execute(): void {
+        // Prepare a mock task.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task();
+        $driver = new archivingmod($mocks->context);
+
+        /** @var activity_archiving_task $task */
+        $task = $mocks->task;
+        $task->set_status(activity_archiving_task_status::UNINITIALIZED);
+
+        // First execution should result in AWAITING_PROCESSING status after yielding.
+        try {
+            $driver->execute_task($task);
+            $this->fail('Expected task to yield for processing.');
+        } catch (yield_exception) {
+            $this->assertEquals(
+                activity_archiving_task_status::AWAITING_PROCESSING,
+                $task->get_status(),
+                'Task should be in AWAITING_PROCESSING status after yielding.'
+            );
+        }
+
+        // Another execution should result in a yield again since the worker handles the rest.
+        try {
+            $driver->execute_task($task);
+            $this->fail('Expected task to yield for processing again.');
+        } catch (yield_exception) {
+            $this->assertEquals(
+                activity_archiving_task_status::AWAITING_PROCESSING,
+                $task->get_status(),
+                'Task should remain in its state.'
+            );
+        }
+
+        // Running tasks are processed in the worker...
+        $task->set_status(activity_archiving_task_status::RUNNING);
+        try {
+            $driver->execute_task($task);
+            $this->fail('Expected task to yield for processing while running.');
+        } catch (yield_exception) {
+            $this->assertEquals(
+                activity_archiving_task_status::RUNNING,
+                $task->get_status(),
+                'Task should remain in its state.'
+            );
+        }
+
+        // Finalizing task should also yield.
+        $task->set_status(activity_archiving_task_status::FINALIZING);
+        try {
+            $driver->execute_task($task);
+            $this->fail('Expected task to yield for processing while finalizing.');
+        } catch (yield_exception) {
+            $this->assertEquals(
+                activity_archiving_task_status::FINALIZING,
+                $task->get_status(),
+                'Task should remain in its state.'
+            );
+        }
+
+        // Finished task should just return.
+        $task->set_status(activity_archiving_task_status::FINISHED);
+        $driver->execute_task($task);
+    }
+
+    /**
+     * Tests that task content metadata is generated correctly.
+     *
+     * @covers \archivingmod_quiz\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata(): void {
+        // Create a mock task.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task();
+        $driver = new archivingmod($mocks->context);
+
+        // Get and verify the task content metadata.
+        $metadata = $driver->get_task_content_metadata($mocks->task);
+        $this->assertCount(1, $metadata, 'There should be one metadata entry for the task.');
+        $this->assertEquals($mocks->task->get_id(), $metadata[0]->taskid, 'Metadata task ID should match the task ID.');
+        $this->assertEquals($mocks->attempts[0]->attemptid, $metadata[0]->refid, 'Metadata refid should match the attempt ID.');
+        $this->assertEquals($mocks->attempts[0]->userid, $metadata[0]->userid, 'Metadata user ID should match the user ID.');
+        $this->assertEquals('quiz_attempts', $metadata[0]->reftable, 'Metadata reftable should be "quiz_attempts".');
     }
 
     /**
@@ -132,7 +224,7 @@ final class archivingmod_test extends \advanced_testcase {
         // Prepare a mock quiz.
         $this->resetAfterTest();
         $mocks = $this->getDataGenerator()->create_mock_quiz(createquestion: true, createattempt: true);
-        $driver = new archivingmod(\context_module::instance($mocks->quiz->cmid));
+        $driver = new archivingmod($mocks->context);
 
         // Get initial fingerprint.
         $fingerprint1 = $driver->fingerprint();

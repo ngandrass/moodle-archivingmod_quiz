@@ -62,10 +62,10 @@ class archivingmod extends \local_archiving\driver\archivingmod {
         // Try to get course, cm info, and quiz.
         [$this->course, $this->cm] = get_course_and_cm_from_cmid($this->cmid, 'quiz');
         if (empty($this->cm)) {
-            throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz');
+            throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz'); // @codeCoverageIgnore
         }
         if ($this->course->id != $this->courseid) {
-            throw new \moodle_exception('invalid_courseid', 'archivingmod_quiz');
+            throw new \moodle_exception('invalid_courseid', 'archivingmod_quiz'); // @codeCoverageIgnore
         }
         $this->quizid = $this->cm->instance;
     }
@@ -111,7 +111,7 @@ class archivingmod extends \local_archiving\driver\archivingmod {
 
     #[\Override]
     public function get_job_create_form(string $handler, \cm_info $cminfo): \local_archiving\form\job_create_form {
-        return new form\job_create_form($handler, $cminfo);
+        return new form\job_create_form($handler, $cminfo); // @codeCoverageIgnore
     }
 
     #[\Override]
@@ -143,6 +143,14 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             $job->set_metadata_entry('num_attempts', count($attempts));
             $job->set_metadata_entry('num_attachments', $numattachments);
 
+            // Do not actually call the remote archive worker during unit tests.
+            if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
+                $task->set_status(activity_archiving_task_status::AWAITING_PROCESSING);
+                throw new yield_exception();
+            }
+
+            // @codeCoverageIgnoreStart
+
             // Enqueue a new job at the worker.
             $worker = remote_archive_worker::instance();
             $workerjob = $worker->enqueue_archive_job(
@@ -155,6 +163,8 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             // TODO (MDL-0): Error handling.
             $task->set_status(activity_archiving_task_status::AWAITING_PROCESSING);
             throw new yield_exception();
+
+            // @codeCoverageIgnoreEnd
         }
 
         if ($task->get_status(usecached: true) == activity_archiving_task_status::AWAITING_PROCESSING) {
