@@ -18,6 +18,7 @@ use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
+use mod_quiz\quiz_settings;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -55,10 +56,14 @@ class archivingmod_quiz_generator extends \testing_data_generator {
     /**
      * Creates a course that contains a quiz module as a new user.
      *
+     * @param bool $createquestion Whether to add a question to the quiz
+     * @param bool $createattempt Whether to create a quiz attempt for the user
+     *
      * @return stdClass The user, course and quiz, as well as mock attempts and
      * archive job settings.
+     * @throws coding_exception
      */
-    public function create_mock_quiz(): \stdClass {
+    public function create_mock_quiz(bool $createquestion = false, bool $createattempt = false): \stdClass {
         // Prepare user and course.
         $user = $this->create_user();
         $course = $this->create_course();
@@ -68,16 +73,36 @@ class archivingmod_quiz_generator extends \testing_data_generator {
             'sumgrades' => 100,
         ]);
 
+        // Add a question to the quiz.
+        if ($createquestion) {
+            /** @var core_question_generator $questiongenerator */
+            $questiongenerator = $this->get_plugin_generator('core_question');
+            $cat = $questiongenerator->create_question_category();
+            $saq = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
+            quiz_add_quiz_question($saq->id, $quiz);
+        }
+
+        // Create a quiz attempt.
+        if ($createattempt) {
+            $quizobj = quiz_settings::create($quiz->id, $user->id);
+            $attempt = quiz_prepare_and_start_new_attempt($quizobj, 1, false, userid: $user->id);
+            $attemptmetadata = [
+                (object) ['userid' => (int) $user->id, 'attemptid' => (int) $attempt->id],
+            ];
+        } else {
+            $attemptmetadata = [
+                (object) ['userid' => 1, 'attemptid' => 1],
+                (object) ['userid' => 2, 'attemptid' => 42],
+                (object) ['userid' => 3, 'attemptid' => 1337],
+            ];
+        }
+
         return (object) [
             'user' => $user,
             'course' => $course,
             'context' => context_module::instance($quiz->cmid),
             'quiz' => $quiz,
-            'attempts' => [
-                (object) ['userid' => 1, 'attemptid' => 1],
-                (object) ['userid' => 2, 'attemptid' => 42],
-                (object) ['userid' => 3, 'attemptid' => 1337],
-            ],
+            'attempts' => $attemptmetadata,
             'settings' => [
                 'num_attempts' => 3,
                 'export_attempts' => 1,
@@ -112,7 +137,7 @@ class archivingmod_quiz_generator extends \testing_data_generator {
         global $DB;
 
         // Create mocks.
-        $mocks = self::create_mock_quiz();
+        $mocks = self::create_mock_quiz(createquestion: true, createattempt: true);
         $job = archive_job::create($mocks->context, get_admin()->id, 'manual', settings: (object) []);
         $task = activity_archiving_task::create(
             $job->get_id(),
