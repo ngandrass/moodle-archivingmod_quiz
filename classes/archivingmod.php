@@ -265,7 +265,7 @@ class archivingmod extends \local_archiving\driver\archivingmod {
      * @throws \dml_exception
      */
     public static function is_webservices_enabled(): bool {
-        return get_config('core', 'enablewebsertices') == true;
+        return get_config('core', 'enablewebservices') == true;
     }
 
     /**
