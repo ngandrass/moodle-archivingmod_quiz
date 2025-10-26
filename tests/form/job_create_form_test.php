@@ -42,6 +42,9 @@ final class job_create_form_test extends \advanced_testcase {
 
         // Ensure that the manual archiving trigger mock thinks it is enabled.
         set_config('enabled', true, 'archivingtrigger_manual');
+
+        // Mock default storage driver.
+        set_config('job_preset_storage_driver', 'localdir', 'local_archiving');
     }
 
     /**
