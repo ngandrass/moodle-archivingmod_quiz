@@ -10,7 +10,7 @@
 - Finalize Moodle privacy API provider
 - Adapt web service unit tests to latest activity archiving task access token invalidation behavior
 - Fix language strings in job creation form validator
-- Create unit tests for activity archiving driver base class
+- Create unit tests for various miscellaneous components
 
 
 ## Version 0.3.0 (2025101300)
