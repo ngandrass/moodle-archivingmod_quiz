@@ -104,7 +104,7 @@ class archivingmod_quiz_generator extends \testing_data_generator {
             'quiz' => $quiz,
             'attempts' => $attemptmetadata,
             'settings' => [
-                'num_attempts' => 3,
+                'num_attempts' => count($attemptmetadata),
                 'export_attempts' => 1,
                 'report_section_header' => 1,
                 'report_section_quiz_feedback' => 1,
@@ -127,17 +127,18 @@ class archivingmod_quiz_generator extends \testing_data_generator {
      * instances produced by self::create_mock_quiz().
      *
      * @param string|null $wstoken The webservice token to set for the task
+     * @param bool $createattempt Whether to create a quiz attempt for the user
      * @return stdClass Object with everything self::create_mock_quiz() returns,
      * plus the job and task objects.
      *
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public function create_mock_task(?string $wstoken = null): \stdClass {
+    public function create_mock_task(?string $wstoken = null, bool $createattempt = true): \stdClass {
         global $DB;
 
         // Create mocks.
-        $mocks = self::create_mock_quiz(createquestion: true, createattempt: true);
+        $mocks = self::create_mock_quiz(createquestion: true, createattempt: $createattempt);
         $job = archive_job::create($mocks->context, get_admin()->id, 'manual', settings: (object) []);
         $task = activity_archiving_task::create(
             $job->get_id(),
