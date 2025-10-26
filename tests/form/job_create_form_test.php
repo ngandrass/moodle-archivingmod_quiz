@@ -39,6 +39,9 @@ final class job_create_form_test extends \advanced_testcase {
 
         parent::setUp();
         $PAGE->set_url('/');
+
+        // Ensure that the manual archiving trigger mock thinks it is enabled.
+        set_config('enabled', true, 'archivingtrigger_manual');
     }
 
     /**
