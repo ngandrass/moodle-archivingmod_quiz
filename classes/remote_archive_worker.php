@@ -97,6 +97,8 @@ class remote_archive_worker {
         $httpstatus = $c->get_info()['http_code'];  // Invalid PHPDoc in Moodle curl wrapper. Array returned instead of string.
         $data = json_decode($result);
 
+        // @codeCoverageIgnoreStart
+
         // Handle errors.
         if ($data === null) {
             throw new \moodle_exception('remote_worker_get_status_failed', 'archivingmod_quiz', $httpstatus);
@@ -115,6 +117,8 @@ class remote_archive_worker {
             'status' => worker_status::from($data->status),
             'queue_len' => (int) $data->queue_len,
         ];
+
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -231,6 +235,8 @@ class remote_archive_worker {
         $httpstatus = $c->get_info()['http_code'];
         $data = json_decode($result);
 
+        // @codeCoverageIgnoreStart
+
         // Handle errors.
         if ($data === null) {
             if ($httpstatus) {
@@ -254,5 +260,7 @@ class remote_archive_worker {
             'uuid' => $data->jobid,
             'status' => activity_archiving_task_status::from((int) $data->status),
         ];
+
+        // @codeCoverageIgnoreEnd
     }
 }

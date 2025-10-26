@@ -6,9 +6,11 @@
     - Bundle web service functions for worker communication inside a statically provided web service
     - Remove superfluous admin settings for manual web service setups
     - Remove superfluous autoinstall feature that was superseded by the statically provided web service
+- Finalize task flow logic for activity archiving tasks
 - Finalize Moodle privacy API provider
 - Adapt web service unit tests to latest activity archiving task access token invalidation behavior
-- Create unit tests for activity archiving driver base class
+- Fix language strings in job creation form validator
+- Create unit tests for various miscellaneous components
 
 
 ## Version 0.3.0 (2025101300)

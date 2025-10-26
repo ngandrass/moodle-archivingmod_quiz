@@ -151,7 +151,8 @@ class archivingmod extends \local_archiving\driver\archivingmod {
 
             // @codeCoverageIgnoreStart
 
-            // Enqueue a new job at the worker.
+            // Enqueue a new job at the worker. Non-recoverable errors are bubbled
+            // up to the core archiving manager and handled there.
             $worker = remote_archive_worker::instance();
             $workerjob = $worker->enqueue_archive_job(
                 wstoken: $wstoken,
@@ -160,31 +161,19 @@ class archivingmod extends \local_archiving\driver\archivingmod {
             );
             $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
 
-            // TODO (MDL-0): Error handling.
             $task->set_status(activity_archiving_task_status::AWAITING_PROCESSING);
             throw new yield_exception();
 
             // @codeCoverageIgnoreEnd
         }
 
-        if ($task->get_status(usecached: true) == activity_archiving_task_status::AWAITING_PROCESSING) {
-            // TODO (MDL-0): Check for timeout. Probably on job level?
-
-            // Task status is updated by the worker.
-            throw new yield_exception();
-        }
-
-        if ($task->get_status(usecached: true) == activity_archiving_task_status::RUNNING) {
-            // TODO (MDL-0): Check for timeout. Probably on job level?
-
-            // Task status is updated by the worker.
-            throw new yield_exception();
-        }
-
-        if ($task->get_status(usecached: true) == activity_archiving_task_status::FINALIZING) {
-            // TODO (MDL-0): Check for timeout. Probably on job level?
-
-            // Task is finalized by process_uploaded_artifact webservice function.
+        // Starting with status AWAITING_PROCESSING control is given to the external worker service. It will interact with the web
+        // service functions and update the task status accordingly. Timeout is handled on job level. Therefore we just yield if the
+        // task is not jet finished or return cleanly if it reached a final state.
+        if ($task->is_completed()) {
+            // Task is completed.
+            return;
+        } else {
             throw new yield_exception();
         }
     }

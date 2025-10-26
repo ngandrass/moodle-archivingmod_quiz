@@ -115,6 +115,7 @@ final class generator_test extends \advanced_testcase {
      * @return void
      * @throws \file_exception
      * @throws \stored_file_creation_exception
+     * @throws \coding_exception
      */
     public function test_create_artifact_file(): void {
         // Create mock quiz and artifact file.
