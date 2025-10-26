@@ -305,7 +305,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
                 storage::FOLDERNAME_FORBIDDEN_CHARACTERS
             )
         ) {
-            $errors['attempt_foldername_pattern'] = get_string('error_invalid_attempt_foldername_pattern', 'local_archiving');
+            $errors['attempt_foldername_pattern'] = get_string('error_invalid_attempt_foldername_pattern', 'archivingmod_quiz');
         }
 
         if (
@@ -315,7 +315,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
                 storage::FILENAME_FORBIDDEN_CHARACTERS
             )
         ) {
-            $errors['attempt_filename_pattern'] = get_string('error_invalid_attempt_filename_pattern', 'local_archiving');
+            $errors['attempt_filename_pattern'] = get_string('error_invalid_attempt_filename_pattern', 'archivingmod_quiz');
         }
 
         return $errors;

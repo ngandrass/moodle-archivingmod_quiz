@@ -9,6 +9,7 @@
 - Finalize task flow logic for activity archiving tasks
 - Finalize Moodle privacy API provider
 - Adapt web service unit tests to latest activity archiving task access token invalidation behavior
+- Fix language strings in job creation form validator
 - Create unit tests for activity archiving driver base class
 
 
