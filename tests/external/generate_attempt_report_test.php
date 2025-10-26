@@ -104,6 +104,7 @@ final class generate_attempt_report_test extends \advanced_testcase {
      * @throws \invalid_parameter_exception
      * @throws \moodle_exception
      * @throws \required_capability_exception
+     * @throws \DOMException
      */
     public function test_wstoken_access_check(): void {
         // Gain webservice permission and create mocks.
