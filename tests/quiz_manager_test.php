@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for the quiz class
+ * Tests for the quiz_manager class
  *
  * @package   archivingmod_quiz
  * @copyright 2025 Niels Gandraß <niels@gandrass.de>
@@ -31,9 +31,9 @@ global $CFG;
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
 /**
- * Tests for the quiz class
+ * Tests for the quiz_manager class
  */
-final class quiz_test extends \advanced_testcase {
+final class quiz_manager_test extends \advanced_testcase {
     /**
      * Returns the data generator for the archivingmod_quiz plugin
      *
@@ -45,9 +45,29 @@ final class quiz_test extends \advanced_testcase {
     }
 
     /**
+     * Tests creating a new quiz manager instance from an existing Moodle context.
+     *
+     * @covers \archivingmod_quiz\quiz_manager
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_creation(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        $quiz = quiz_manager::from_context(\context_module::instance($rc->cm->id));
+        $this->assertSame($rc->quiz->id, $quiz->get_quiz()->id, 'Quiz ID does not match');
+        $this->assertSame($rc->course->id, $quiz->get_course()->id, 'Course ID does not match');
+        $this->assertSame($rc->cm->id, $quiz->get_cm()->id, 'Course module ID does not match');
+    }
+
+    /**
      * Tests to get the attempts of a quiz
      *
-     * @covers \archivingmod_quiz\quiz_manager::get_attempts
+     * @covers \archivingmod_quiz\quiz_manager
      *
      * @return void
      * @throws \dml_exception
@@ -68,7 +88,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to get the attempt metadata array for a quiz
      *
-     * @covers \archivingmod_quiz\quiz_manager::get_attempts_metadata
+     * @covers \archivingmod_quiz\quiz_manager
      *
      * @return void
      * @throws \dml_exception
@@ -113,7 +133,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to retrieve existing and nonexisting attempts
      *
-     * @covers \archivingmod_quiz\quiz_manager::attempt_exists
+     * @covers \archivingmod_quiz\quiz_manager
      *
      * @return void
      * @throws \dml_exception
@@ -132,7 +152,7 @@ final class quiz_test extends \advanced_testcase {
     /**
      * Tests to get the attachments of an attempt
      *
-     * @covers \archivingmod_quiz\quiz_manager::get_attempt_attachments
+     * @covers \archivingmod_quiz\quiz_manager
      *
      * @return void
      * @throws \dml_exception
@@ -154,5 +174,20 @@ final class quiz_test extends \advanced_testcase {
             ),
             'cake.md attachment not found'
         );
+
+        // Check attachments metadata.
+        $attachmentsmetadata = $quiz->get_attempt_attachments_metadata($rc->attemptids[0]);
+        $this->assertNotEmpty($attachmentsmetadata, 'No attachments metadata found');
+        $attachmentmetadata = array_shift($attachmentsmetadata);
+        $this->assertNotEmpty($attachmentmetadata->slot, 'Attachment metadata does not contain slot');
+        $this->assertEquals(
+            'cake.md',
+            $attachmentmetadata->filename,
+            'Attachment metadata filename is incorrect'
+        );
+        $this->assertGreaterThan(0, $attachmentmetadata->filesize, 'Attachment metadata filesize is incorrect');
+        $this->assertNotEmpty($attachmentmetadata->mimetype, 'Attachment metadata does not contain mimetype');
+        $this->assertNotEmpty($attachmentmetadata->contenthash, 'Attachment metadata does not contain contenthash');
+        $this->assertNotEmpty($attachmentmetadata->downloadurl, 'Attachment metadata does not contain downloadurl');
     }
 }
