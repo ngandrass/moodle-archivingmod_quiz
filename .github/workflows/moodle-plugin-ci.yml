@@ -86,7 +86,7 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           # Install archiving core plugin to create a home for this sub-plugin.
-          moodle-plugin-ci add-plugin ngandrass/moodle-local_archiving
+          moodle-plugin-ci add-plugin --branch develop ngandrass/moodle-local_archiving
           for subplugintype in mod store trigger event; do
             rm -rf "moodle-plugin-ci-plugins/moodle-local_archiving/driver/${subplugintype}"/*
           done

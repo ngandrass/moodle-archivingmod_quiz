@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'archivingmod_quiz';
 $plugin->release = '0.3.0';
-$plugin->version = 2025101300;
+$plugin->version = 2025101301;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 501];
 $plugin->maturity = MATURITY_ALPHA;

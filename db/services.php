@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+// Web service function definitions.
 $functions = [
     'archivingmod_quiz_generate_attempt_report' => [
         'classname' => 'archivingmod_quiz\external\generate_attempt_report',
@@ -54,5 +55,18 @@ $functions = [
         'type' => 'write',
         'ajax' => true,
         'services' => [],
+    ],
+];
+
+// Web service definitions.
+$services = [
+    'archivingmod_quiz_ws' => [
+        'functions' => array_keys($functions),
+        'shortname' => 'archivingmod_quiz_ws',
+        'requiredcapability' => '',
+        'restrictedusers' => false,
+        'enabled' => 1,
+        'downloadfiles' => true,
+        'uploadfiles'  => true,
     ],
 ];

@@ -22,11 +22,11 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use archivingmod_quiz\local\autoinstall;
 use archivingmod_quiz\type\attempt_filename_variable;
 use archivingmod_quiz\type\attempt_report_section;
 use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
+use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
 use local_archiving\type\paper_format;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -54,27 +54,18 @@ if ($hassiteconfig) {
             '1'
         ));
 
-        // Autoinstall.
-        if (autoinstall::plugin_is_unconfigured()) {
-            // @codingStandardsIgnoreStart
-            $autoinstallurl = new moodle_url('/local/archiving/driver/mod/quiz/autoinstall.php');
-            $autoinstalldesc = "<a href='{$autoinstallurl}' class='btn btn-primary'>".get_string('autoinstall_start_now', 'archivingmod_quiz')."</a>";
-            $autoinstalldesc .= "<br><br><p>".get_string('autoinstall_explanation', 'archivingmod_quiz')."</p>";
-            // @codingStandardsIgnoreEnd
-        } else {
-            $autoinstalldesc = get_string('autoinstall_already_configured', 'archivingmod_quiz');
-        }
-        $settings->add(new admin_setting_description(
-            'archivingmod_quiz/autoinstall',
-            get_string('setting_autoconfigure', 'archivingmod_quiz'),
-            $autoinstalldesc
-        ));
-
         // Worker service.
         $settings->add(new admin_setting_heading(
             'archivingmod_quiz/header_archive_worker',
             get_string('setting_header_archive_worker', 'archivingmod_quiz'),
             get_string('setting_header_archive_worker_desc', 'archivingmod_quiz')
+        ));
+
+        // Worker service: Global webservice settings.
+        $settings->add(new admin_setting_webservice_enabler(
+            'archivingmod_quiz/webservice_enabler',
+            get_string('setting_webservice_enabler', 'archivingmod_quiz'),
+            get_string('setting_webservice_enabler_desc', 'archivingmod_quiz')
         ));
 
         // Worker service: URL.
@@ -84,24 +75,6 @@ if ($hassiteconfig) {
             get_string('setting_worker_url_desc', 'archivingmod_quiz'),
             '',
             PARAM_TEXT
-        ));
-
-        // Worker service: Webservice.
-        $settings->add(new admin_setting_configselect(
-            'archivingmod_quiz/webservice_id',
-            get_string('webservice', 'webservice'),
-            get_string('setting_webservice_desc', 'archivingmod_quiz'),
-            null,
-            [-1 => ''] + $DB->get_records_menu('external_services', null, 'name ASC', 'id, name')
-        ));
-
-        // Worker service: Webservice user.
-        $settings->add(new admin_setting_configtext(
-            'archivingmod_quiz/webservice_userid',
-            get_string('setting_webservice_userid', 'archivingmod_quiz'),
-            get_string('setting_webservice_userid_desc', 'archivingmod_quiz'),
-            '',
-            PARAM_INT
         ));
 
         // Worker service: Custom Moodle base URL.

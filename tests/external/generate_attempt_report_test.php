@@ -26,6 +26,7 @@ namespace archivingmod_quiz\external;
 
 use archivingmod_quiz\type\attempt_report_section;
 use archivingmod_quiz\type\webservice_status;
+use function DI\create;
 
 /**
  * Tests for the generate_attempt_report external service
@@ -103,13 +104,17 @@ final class generate_attempt_report_test extends \advanced_testcase {
      * @throws \invalid_parameter_exception
      * @throws \moodle_exception
      * @throws \required_capability_exception
+     * @throws \DOMException
      */
     public function test_wstoken_access_check(): void {
         // Gain webservice permission and create mocks.
         $this->resetAfterTest();
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-VALID';
-        $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
+
+        // Create a mock task for a quiz without an attempt since PHPUnit uses the CLI-renderer which skips output headers / footers
+        // what causes attempt_report::generate_full_page() to fail. This way it is skipped and tested in other test cases instead.
+        $mocks = $this->getDataGenerator()->create_mock_task($wstoken, createattempt: false);
 
         // Generate a valid request.
         $uuid = '30000000-0000-0000-0000-0123456789ab';
@@ -230,7 +235,10 @@ final class generate_attempt_report_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-1';
-        $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
+
+        // Create a mock task for a quiz without an attempt since PHPUnit uses the CLI-renderer which skips output headers / footers
+        // what causes attempt_report::generate_full_page() to fail. This way it is skipped and tested in other test cases instead.
+        $mocks = $this->getDataGenerator()->create_mock_task($wstoken, createattempt: false);
 
         // Create a valid request.
         $uuid = '10000000-0000-0000-0000-0123456789ab';

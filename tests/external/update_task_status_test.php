@@ -295,17 +295,17 @@ final class update_task_status_test extends \advanced_testcase {
             'Task Status: FINISHED -> TIMEOUT' => [
                 activity_archiving_task_status::FINISHED,
                 activity_archiving_task_status::TIMEOUT,
-                webservice_status::E_ALREADY_COMPLETED,
+                webservice_status::E_ACCESS_DENIED,
             ],
             'Task Status: CANCELED -> RUNNING' => [
                 activity_archiving_task_status::CANCELED,
                 activity_archiving_task_status::RUNNING,
-                webservice_status::E_ALREADY_COMPLETED,
+                webservice_status::E_ACCESS_DENIED,
             ],
             'Task Status: TIMEOUT -> RUNNING' => [
                 activity_archiving_task_status::TIMEOUT,
                 activity_archiving_task_status::RUNNING,
-                webservice_status::E_ALREADY_COMPLETED,
+                webservice_status::E_ACCESS_DENIED,
             ],
         ];
     }
