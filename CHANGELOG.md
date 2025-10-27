@@ -1,7 +1,8 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.0.0 (2025102700)
 
+- First stable release 🎉
 - Simplify web service setup process
     - Bundle web service functions for worker communication inside a statically provided web service
     - Remove superfluous admin settings for manual web service setups
